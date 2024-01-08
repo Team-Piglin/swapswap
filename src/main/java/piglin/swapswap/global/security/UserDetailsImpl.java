@@ -1,5 +1,6 @@
 package piglin.swapswap.global.security;
 
+import lombok.Getter;
 import piglin.swapswap.domain.user.entity.User;
 import piglin.swapswap.domain.user.constant.UserRoleEnum;
 import java.util.ArrayList;
@@ -8,6 +9,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+@Getter
 public class UserDetailsImpl implements UserDetails {
 
 	private final User user;
