@@ -18,8 +18,21 @@
       var nicknameSpan = document.querySelector('.edit_nickname');
       var originalNickname = nicknameSpan.innerText.trim();
 
+
+
       document.querySelector('#nicknameLink').addEventListener('click', function (event) {
         var newNickname = nicknameSpan.innerText.trim();
+        var regex = /^(?!.*ㅎ)[가-힣]*$/;
+        var containsHieut = regex.test(newNickname);
+
+       if (containsHieut) {
+          swal({
+            title: '알림',
+            text: '닉네임에 ㅎ받침을 포함할 수 없습니다.',
+            icon: 'error'
+          });
+          return;
+        }
 
         if (newNickname === originalNickname) {
           swal({
@@ -76,7 +89,7 @@
             console.error(xhr);
           };
           xhr.send();
-        } else {
+        }  else {
           swal({
             title: '알림',
             text: '닉네임은 특수 문자를 제외한 \n2자 이상 15자 이내로 설정해주세요',
