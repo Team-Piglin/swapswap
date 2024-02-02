@@ -18,6 +18,7 @@ import piglin.swapswap.domain.member.entity.Member;
 import piglin.swapswap.domain.membercoupon.dto.response.MyCouponGetResponseDto;
 import piglin.swapswap.domain.membercoupon.service.MemberCouponService;
 import piglin.swapswap.global.annotation.AuthMember;
+import piglin.swapswap.global.annotation.HttpRequestLog;
 
 @Controller
 @RequiredArgsConstructor
@@ -31,7 +32,8 @@ public class BillCouponController {
     public String showMyCouponList(
             @PathVariable Long billId,
             @RequestParam Long dealId,
-            @AuthMember Member member, Model model) {
+            @AuthMember Member member, Model model
+    ) {
 
         billCouponService.initialBillCouponList(billId);
         List<MyCouponGetResponseDto> myCouponDtoList = memberCouponService.getMycouponList(member);
@@ -43,11 +45,13 @@ public class BillCouponController {
         return "deal/dealCouponList";
     }
 
+    @HttpRequestLog
     @PostMapping("/{billId}")
     public ResponseEntity<?> redeemCoupons(
             @PathVariable Long billId,
             @AuthMember Member member,
-            @Valid @RequestBody RedeemCouponRequestDto dealRedeemCouponRequestDto) {
+            @Valid @RequestBody RedeemCouponRequestDto dealRedeemCouponRequestDto
+    ) {
 
         billCouponService.redeemCoupons(billId, member, dealRedeemCouponRequestDto);
 

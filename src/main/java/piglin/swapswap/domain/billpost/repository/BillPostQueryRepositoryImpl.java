@@ -32,6 +32,16 @@ public class BillPostQueryRepositoryImpl implements BillPostQueryRepository {
     }
 
     @Override
+    public List<Long> findAllPostIdByBill(Bill bill) {
+
+        return queryFactory
+                .select(post.id)
+                .from(billPost)
+                .where(billPost.bill.eq(bill))
+                .fetch();
+    }
+
+    @Override
     public void deleteAllByBill(Bill bill) {
 
         queryFactory

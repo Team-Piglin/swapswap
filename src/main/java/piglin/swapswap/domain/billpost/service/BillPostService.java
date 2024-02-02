@@ -11,4 +11,8 @@ public interface BillPostService {
     List<BillPostResponseDto> getBillPostDtoList(Bill bill);
 
     void deleteAllByBill(Bill bill);
+
+    List<Long> getPostIdListByBill(Bill bill);
+
+    void updatePostListDealStatusByBill(Bill bill);
 }
