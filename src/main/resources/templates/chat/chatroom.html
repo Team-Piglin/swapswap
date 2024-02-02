@@ -26,7 +26,7 @@
         <div class="form-group">
           <div class="input-group clearfix">
             <input type="text" id="message" placeholder="Type a message..." autocomplete="off" class="form-control"/>
-            <button type="submit" >보내기</button>
+            <button class="submit" type="submit">보내기</button>
             <button class="leave" th:data-room-id="${roomId}" th:onclick="leaveChatRoom(this.getAttribute('data-room-id'))">채팅방 나가기</button>
           </div>
         </div>
