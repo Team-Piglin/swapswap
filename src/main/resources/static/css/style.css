@@ -325,6 +325,12 @@ img {
   background-color: #28a745; /* 거래 완료일 때의 색상 */
 }
 
+.post-no-result {
+  text-align: center;
+  font-size: 1.2rem;
+  color: #a0a0a0;
+}
+
 /**
 포스트 Write CSS
  */
