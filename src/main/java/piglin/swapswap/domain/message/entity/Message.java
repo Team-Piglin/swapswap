@@ -1,24 +1,18 @@
 package piglin.swapswap.domain.message.entity;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
-import piglin.swapswap.domain.chatroom.entity.ChatRoom;
+import org.springframework.data.mongodb.core.mapping.Document;
 import piglin.swapswap.domain.common.BaseTime;
 import piglin.swapswap.domain.message.constant.MessageType;
 
-@Entity
+@Document("message")
 @Builder
 @Getter
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -26,22 +20,16 @@ import piglin.swapswap.domain.message.constant.MessageType;
 public class Message extends BaseTime {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private String id;
 
-    @Column(nullable = false)
+    private String roomId;
+
     private Long memberId;
 
     @Enumerated(EnumType.STRING)
     private MessageType type;
 
-    @Column(nullable = false)
     private String text;
 
-    @Column(nullable = false)
     private Boolean isDeleted;
-
-    @ManyToOne
-    @JoinColumn(name = "chatroom_id")
-    private ChatRoom chatRoom;
 }

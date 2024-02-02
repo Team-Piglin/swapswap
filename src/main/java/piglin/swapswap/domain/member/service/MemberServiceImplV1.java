@@ -5,7 +5,6 @@ import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import piglin.swapswap.domain.chatroom_member.service.ChatRoomMemberService;
 import piglin.swapswap.domain.favorite.service.FavoriteService;
 import piglin.swapswap.domain.member.dto.MemberNicknameDto;
 import piglin.swapswap.domain.member.entity.Member;
@@ -30,9 +29,7 @@ public class MemberServiceImplV1 implements MemberService {
     private final MemberCouponService memberCouponService;
     private final WalletHistoryService walletHistoryService;
     private final FavoriteService favoriteService;
-    private final ChatRoomMemberService chatRoomMemberService;
     private final NotificationService notificationService;
-
 
     @SwapLog
     @Override
@@ -75,8 +72,6 @@ public class MemberServiceImplV1 implements MemberService {
         wallet.deleteWallet();
 
         walletHistoryService.deleteAllWalletHistoriesByWallet(member.getWallet());
-
-        chatRoomMemberService.deleteAllChatroomByMember(member);
 
         memberCouponService.deleteAllMemberCouponByMember(member);
 

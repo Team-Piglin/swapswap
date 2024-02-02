@@ -72,7 +72,7 @@
 
       if (messageContent && stompClient) {
         let chatMessage = {
-          chatRoomId: chatRoomId,
+          roomId: chatRoomId,
           type: 'CHAT',
           senderId: senderId,
           text: messageInput.value
