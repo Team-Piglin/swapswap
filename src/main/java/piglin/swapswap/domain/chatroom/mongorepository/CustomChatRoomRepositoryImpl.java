@@ -5,6 +5,7 @@ import static org.springframework.data.mongodb.core.query.Query.query;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Optional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -20,11 +21,11 @@ public class CustomChatRoomRepositoryImpl implements CustomChatRoomRepository {
     private final MongoTemplate mongoTemplate;
 
     @Override
-    public ChatRoom getChatRoom(String roomId) {
+    public Optional<ChatRoom> getChatRoom(String roomId) {
 
         Query query = new Query(where("id").is(roomId).and("isDeleted").is(false));
 
-        return mongoTemplate.findOne(query, ChatRoom.class);
+        return Optional.ofNullable(mongoTemplate.findOne(query, ChatRoom.class));
     }
 
     @Override

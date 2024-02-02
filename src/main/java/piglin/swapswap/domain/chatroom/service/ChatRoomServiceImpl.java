@@ -117,8 +117,8 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     private ChatRoom getChatRoom(String roomId) {
 
-        return Optional.ofNullable(chatRoomRepository.getChatRoom(roomId))
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_CHATROOM_EXCEPTION));
+        return chatRoomRepository.getChatRoom(roomId).orElseThrow(() ->
+                new BusinessException(ErrorCode.NOT_FOUND_CHATROOM_EXCEPTION));
     }
 
     private void validateMember(Member member, ChatRoom chatRoom) {

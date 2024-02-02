@@ -1,13 +1,14 @@
 package piglin.swapswap.domain.chatroom.mongorepository;
 
 import java.util.List;
+import java.util.Optional;
 import piglin.swapswap.domain.chatroom.entity.ChatRoom;
 import piglin.swapswap.domain.member.entity.Member;
 import piglin.swapswap.domain.message.dto.request.MessageRequestDto;
 
 public interface CustomChatRoomRepository {
 
-    ChatRoom getChatRoom(String roomId);
+    Optional<ChatRoom> getChatRoom(String roomId);
 
     List<ChatRoom> getChatRoomList(Member member);
 
