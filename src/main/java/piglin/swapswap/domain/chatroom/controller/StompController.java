@@ -19,7 +19,7 @@ public class StompController {
 
         chatRoomService.saveMessage(message);
 
-        String destination = "/queue/chat/room" + message.chatRoomId();
+        String destination = "/queue/chat/room" + message.roomId();
         sendingOperations.convertAndSend(destination, message);
     }
 }

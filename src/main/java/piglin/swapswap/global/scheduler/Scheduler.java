@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import piglin.swapswap.domain.chatroom.repository.ChatRoomRepository;
+import piglin.swapswap.domain.chatroom.mongorepository.ChatRoomRepository;
 import piglin.swapswap.domain.favorite.repository.FavoriteRepository;
 import piglin.swapswap.domain.member.repository.MemberRepository;
 import piglin.swapswap.domain.membercoupon.repository.MemberCouponRepository;

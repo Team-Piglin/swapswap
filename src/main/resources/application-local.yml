@@ -13,6 +13,10 @@ spring:
         show_sql: true
     open-in-view: false
 
+  data:
+    mongodb:
+      uri: ${MONGO_URI}
+
   servlet:
     multipart:
       max-file-size: 10MB

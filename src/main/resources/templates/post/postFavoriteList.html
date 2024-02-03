@@ -8,6 +8,9 @@
     💙 내 찜 목록 💙
   </div>
   <div class="post-container">
+    <div class="room-container" th:if="${postListResponseDto.postList().isEmpty()}">
+      <p class="post-no-result">찜한 게시글이 없습니다.</p>
+    </div>
     <div th:each="postDto : ${postListResponseDto.postList}" class="post-card"
          th:data-modified-time="${postDto.modifiedUpTime}">
       <a th:href="@{/posts/{postId}(postId=${postDto.postId})}">

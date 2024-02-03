@@ -8,15 +8,15 @@ import piglin.swapswap.domain.message.dto.response.MessageResponseDto;
 
 public interface ChatRoomService {
 
-    ChatRoomResponseDto getChatRoomResponseDto(Long roomId, Long memberId);
+    ChatRoomResponseDto getChatRoomResponseDto(String roomId, Long memberId);
 
     List<ChatRoomResponseDto> getChatRoomList(Member member);
 
-    List<MessageResponseDto> getMessageByChatRoomId(Long roomId, Member member);
+    List<MessageResponseDto> getMessageByChatRoomId(String roomId, Member member);
 
-    Long createChatroom(Member member, Long secondMemberId);
+    String createChatroom(Member member, Long secondMemberId);
 
     void saveMessage(MessageRequestDto requestDto);
 
-    void leaveChatRoom(Member member, Long roomId);
+    void leaveChatRoom(Member member, String roomId);
 }

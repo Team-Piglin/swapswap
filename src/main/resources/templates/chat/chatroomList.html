@@ -12,7 +12,7 @@
 
 
         <div class="room-container" th:if="${#lists.isEmpty(chatRoomList)}">
-          <p>현재 대화 중인 채팅방이 없습니다.</p>
+          <p class="no-room">현재 대화 중인 채팅방이 없습니다.</p>
         </div>
 
         <a th:each="chatRoom : ${chatRoomList}" th:href="@{/chats/room/{roomId}(roomId=${chatRoom.id})}" class="room">
