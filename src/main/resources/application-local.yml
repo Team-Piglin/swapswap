@@ -13,10 +13,6 @@ spring:
         show_sql: true
     open-in-view: false
 
-  data:
-    mongodb:
-      uri: ${MONGO_URI}
-
   servlet:
     multipart:
       max-file-size: 10MB
@@ -26,12 +22,11 @@ spring:
     hiddenmethod:
       filter:
         enabled: true
-  data:
-    redis:
-      host: 127.0.0.1
-      port: 6379
 
   data:
+    mongodb:
+      uri: localhost
+
     redis:
       host: localhost
       port: 6379
