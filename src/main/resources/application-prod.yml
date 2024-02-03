@@ -23,6 +23,9 @@ spring:
         enabled: true
 
   data:
+    mongodb:
+      uri: localhost
+
     redis:
       host: localhost
       port: 6379
