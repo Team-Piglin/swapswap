@@ -23,11 +23,11 @@ public class LogAspect {
     @Before("@annotation(piglin.swapswap.global.annotation.SwapLog)")
     public void swapLog(JoinPoint joinPoint) {
 
-        log.info("\nMethod - {} | Method Argument - {}",joinPoint.getSignature().getName(), joinPoint.getArgs());
+        log.info("\nMethod - {} | Method Argument - {}", joinPoint.getSignature().toShortString(), joinPoint.getArgs());
     }
 
     @Before("@annotation(piglin.swapswap.global.annotation.HttpRequestLog)")
-    public void httpRequestLog(JoinPoint joinPoint) {
+    public void httpRequestLog() {
 
         MDC.put("traceId", UUID.randomUUID().toString());
 
@@ -36,13 +36,13 @@ public class LogAspect {
         log.info("\nIP - {} | Browser - {}\n▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ Cookie ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼ ▼\n{} \n▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲ ▲", getRemoteAddr(req), getBrowser(req), getCookie(req));
     }
 
-    @AfterReturning("@annotation(piglin.swapswap.global.annotation.SwapLog)")
+    @AfterReturning("@annotation(piglin.swapswap.global.annotation.HttpRequestLog)")
     public void swapLogAfterReturning() {
 
         MDC.clear();
     }
 
-    @AfterThrowing(value = "@annotation(piglin.swapswap.global.annotation.SwapLog)", throwing = "exception")
+    @AfterThrowing(value = "@annotation(piglin.swapswap.global.annotation.HttpRequestLog)", throwing = "exception")
     public void swapLogAfterThrowing(Exception exception) {
 
         log.error("errorCause - ", exception.getCause());

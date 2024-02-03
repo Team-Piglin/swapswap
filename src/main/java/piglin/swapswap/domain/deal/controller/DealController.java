@@ -17,6 +17,7 @@ import piglin.swapswap.domain.deal.dto.response.DealDetailResponseDto;
 import piglin.swapswap.domain.deal.service.DealService;
 import piglin.swapswap.domain.member.entity.Member;
 import piglin.swapswap.global.annotation.AuthMember;
+import piglin.swapswap.global.annotation.HttpRequestLog;
 
 @Controller
 @RequiredArgsConstructor
@@ -26,9 +27,12 @@ public class DealController {
     private final DealService dealService;
 
     @GetMapping("/request")
-    public String createDealForm(Model model, @AuthMember Member member,
+    public String createDealForm(
             @RequestParam Long receiveMemberId,
-            @RequestParam String memberName) {
+            @RequestParam String memberName,
+            @AuthMember Member member,
+            Model model
+    ) {
 
             dealService.isDifferentMember(member, receiveMemberId);
 
@@ -41,10 +45,13 @@ public class DealController {
         return "deal/dealCreateForm";
     }
 
+    @HttpRequestLog
     @ResponseBody
     @PostMapping
-    public ResponseEntity<?> createDeal(@AuthMember Member member,
-            @Valid @RequestBody DealCreateRequestDto requestDto) {
+    public ResponseEntity<?> createDeal(
+            @AuthMember Member member,
+            @Valid @RequestBody DealCreateRequestDto requestDto
+    ) {
 
         Long dealId = dealService.createDeal(member, requestDto);
 
@@ -54,7 +61,8 @@ public class DealController {
     @GetMapping("/request/list")
     public String getRequestDealList(
             @AuthMember Member member,
-            Model model) {
+            Model model
+    ) {
 
         model.addAttribute("dealGetListResponseDto",
                 dealService.getMyRequestDealList(member.getId()));
@@ -66,7 +74,8 @@ public class DealController {
     @GetMapping("response/list")
     public String getResponseDealList(
             @AuthMember Member member,
-            Model model) {
+            Model model
+    ) {
 
         model.addAttribute("dealGetListResponseDto",
                 dealService.getMyReceiveDealList(member.getId()));
@@ -77,8 +86,10 @@ public class DealController {
 
     @GetMapping("/{dealId}")
     public String getDeal(
-            @AuthMember Member member, @PathVariable Long dealId,
-            Model model) {
+            @PathVariable Long dealId,
+            @AuthMember Member member,
+            Model model
+    ) {
 
         DealDetailResponseDto responseDto = dealService.getDeal(dealId, member);
 
@@ -89,8 +100,10 @@ public class DealController {
     }
 
     @GetMapping("/history")
-    public String getDealHistory(@AuthMember Member member,
-            Model model) {
+    public String getDealHistory(
+            @AuthMember Member member,
+            Model model
+    ) {
 
         model.addAttribute("dealHistoryResponseDto", dealService.getDealHistoryList(member.getId()));
         model.addAttribute("memberNickname", member.getNickname());

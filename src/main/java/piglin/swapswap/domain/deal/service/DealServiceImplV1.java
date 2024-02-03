@@ -2,6 +2,7 @@ package piglin.swapswap.domain.deal.service;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import piglin.swapswap.domain.bill.entity.Bill;
@@ -24,11 +25,13 @@ import piglin.swapswap.domain.member.entity.Member;
 import piglin.swapswap.domain.member.service.MemberService;
 import piglin.swapswap.domain.notification.constant.NotificationType;
 import piglin.swapswap.domain.notification.service.NotificationService;
+import piglin.swapswap.global.annotation.SwapLog;
 import piglin.swapswap.global.exception.common.BusinessException;
 import piglin.swapswap.global.exception.common.ErrorCode;
 import piglin.swapswap.global.exception.deal.InvalidDealRequestException;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class DealServiceImplV1 implements DealService {
 
@@ -41,9 +44,11 @@ public class DealServiceImplV1 implements DealService {
     private final DealWalletService dealWalletService;
 
     @Override
+    @SwapLog
     @Transactional
     public Long createDeal(Member member, DealCreateRequestDto requestDto) {
 
+        log.info("createDeal - requestMemberId: {}", member.getId());
         if (requestDto.requestPostIdList().isEmpty() && requestDto.receivePostIdList().isEmpty()) {
             throw new InvalidDealRequestException(ErrorCode.BOTH_POST_ID_LIST_EMPTY_EXCEPTION);
         }
@@ -57,13 +62,13 @@ public class DealServiceImplV1 implements DealService {
                 requestDto.receivePostIdList());
 
         Deal deal = DealMapper.createDeal(requestMemberBill, receiveMemberBill);
-
+        log.info("BillIdAfterCreateDeal - requestMemberBillId: {} | receiveMemberBillId: {}", deal.getRequestMemberbill().getId(), deal.getReceiveMemberbill().getId());
         String Url = "http://swapswap.shop/deals/" + deal.getId();
         String content = receiveMember.getNickname()+"님! 거래 요청이 왔어요!";
         notificationService.send(receiveMember, NotificationType.DEAL,content,Url);
 
         dealRepository.save(deal);
-
+        log.info("dealId: {}", deal.getId());
         return deal.getId();
     }
 
@@ -125,15 +130,18 @@ public class DealServiceImplV1 implements DealService {
     }
 
     @Override
+    @SwapLog
     @Transactional
     public void bothTakeThenChangeCompleted(Long billId) {
 
         Deal deal = getDealByBillIdWithBill(billId);
+        log.info("dealId: {} | originalDealStatus: {}", deal.getId(), deal.getDealStatus());
 
         if(deal.getRequestMemberbill().getIsTaked() && deal.getReceiveMemberbill().getIsTaked()) {
 
             deal.updateDealStatus(DealStatus.COMPLETED);
             deal.completedTime();
+            log.info("dealId: {} | updatedDealStatus: {} | updatedDealCompletedTime: {}", deal.getId(), deal.getDealStatus(), deal.getCompletedDealTime());
 
             if(dealWalletService.existDealWalletByDealId(deal.getId())) {
                 dealWalletService.withdrawMemberSwapMoneyAtComplete(deal);
