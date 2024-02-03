@@ -8,12 +8,12 @@ import piglin.swapswap.domain.member.entity.Member;
 @RequiredArgsConstructor
 public class ChatRoomMapper {
 
-    public static ChatRoom createChatRoom(Member firstMember, Member secondMember) {
+    public static ChatRoom createChatRoom(Member firstMember, Long secondMemberId) {
 
         return ChatRoom.builder()
                 .firstMemberId(firstMember.getId())
                 .isLeaveFirstMember(false)
-                .secondMemberId(secondMember.getId())
+                .secondMemberId(secondMemberId)
                 .isLeaveSecondMember(false)
                 .isDeleted(false)
                 .build();
@@ -27,8 +27,6 @@ public class ChatRoomMapper {
                 .lastMessage(chatRoom.getLastMessage())
                 .lastMessageTime(chatRoom.getLastMessageTime())
                 .build();
-
     }
 
 }
-
