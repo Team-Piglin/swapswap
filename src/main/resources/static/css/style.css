@@ -626,6 +626,10 @@ img {
   color: #333;
 }
 
+.author-details span {
+  cursor: pointer;
+}
+
 .post-title-meta-section {
   padding: 20px;
 }
@@ -766,6 +770,13 @@ img {
 .myPage_profile .myPage_profile_title {
   width: 500px;
   margin-bottom: 40px;
+  font-size: 25px;
+  font-weight: 900;
+  border-bottom: 1px solid #ccc;
+}
+
+.myPage_profile .otherPage_profile_title {
+  width: 500px;
   font-size: 25px;
   font-weight: 900;
   border-bottom: 1px solid #ccc;

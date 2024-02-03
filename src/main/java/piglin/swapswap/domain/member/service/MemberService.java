@@ -1,7 +1,9 @@
 package piglin.swapswap.domain.member.service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import piglin.swapswap.domain.member.dto.MemberNicknameDto;
+import piglin.swapswap.domain.member.dto.OtherMemberInfoDto;
 import piglin.swapswap.domain.member.entity.Member;
 
 public interface MemberService {
@@ -19,4 +21,6 @@ public interface MemberService {
     boolean checkNicknameExists(String nickname);
 
     List<Member> getMembers(List<Long> memberIds);
+
+    OtherMemberInfoDto getOtherMemberInfo(Long memberId, LocalDateTime cursorTime);
 }

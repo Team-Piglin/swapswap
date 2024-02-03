@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout=http://www.ultraq.net.nz/thymeleaf/layout
+      layout:decorate="~{common/layout/layout}">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>스왑스왑</title>
+
+  <link rel="shortcut icon" th:href="@{/favicon.ico}">
+  <link rel="stylesheet" th:href="@{/css/style.css}">
+  <link rel="stylesheet"
+        href="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.10/dist/sweetalert2.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11.4.10/dist/sweetalert2.min.js"></script>
+
+  <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+</head>
+<body>
+<div layout:fragment="content">
+  <div class="myPage_profile" style="border-bottom: solid #ccc 2px;">
+    <div class="otherPage_profile_title">
+      <p><span th:text="${otherMemberInfo.nickname}"></span> 님의 프로필</p>
+    </div>
+    <p style="font-size: 20px;">가입일: <span th:text="${#temporals.format(otherMemberInfo.createdTime, 'yyyy-MM-dd')}"></span></p>
+    <h2><span th:text="${otherMemberInfo.nickname}"></span> 님의 게시글</h2>
+  </div>
+  <div class="post-container" th:if="${otherMemberInfo.postList.postList().isEmpty()}">
+    <p>아직 게시물이 없습니다!</p>
+  </div>
+  <div class="post-container" >
+    <div th:each="postDto : ${otherMemberInfo.postList.postList()}" class="post-card"
+         th:data-modified-time="${postDto.modifiedUpTime()}">
+      <a th:href="@{/posts/{postId}(postId=${postDto.postId})}">
+        <div class="post-image-container">
+          <img th:unless="${postDto.dealStatus == postDto.dealStatus.REQUESTED}" th:src="${postDto.imageUrl.get(0).toString}" alt="Post Image" class="post-image activeDeal">
+          <img th:if="${postDto.dealStatus == postDto.dealStatus.REQUESTED}" th:src="${postDto.imageUrl.get(0).toString}" alt="Post Image" class="post-image">
+          <div class="post-deal-status">
+            <div th:if="${postDto.dealStatus == postDto.dealStatus.DEALING}" class="post-deal-status dealing"> 거래 진행 중 </div>
+            <div th:if="${postDto.dealStatus == postDto.dealStatus.COMPLETED}" class="post-deal-status completed"> 거래 완료 </div>
+          </div>
+        </div>
+        <h2 th:text="${postDto.title}" class="post-title"></h2>
+        <div class="post-stats">
+          <span class="view-count">조회수 <span th:text="${postDto.viewCnt}"></span></span>
+          <span class="favorite-count">찜 <span th:text="${postDto.favoriteCnt}"></span></span>
+          <span class="post-city"><span th:text="${postDto.city.getProvince.getName}"></span> / <span th:text="${postDto.city.getName}"></span></span>
+          <span class="modified-date"><span
+              th:if="${#temporals.format(postDto.modifiedUpTime(), 'yyyyMMdd') == #temporals.format(#temporals.createNow(), 'yyyyMMdd')}"
+              th:text="${#temporals.format(postDto.modifiedUpTime, 'HH:mm')}"></span>
+          <span
+              th:unless="${#temporals.format(postDto.modifiedUpTime(), 'yyyyMMdd') == #temporals.format(#temporals.createNow(), 'yyyyMMdd')}"
+              th:text="${#temporals.format(postDto.modifiedUpTime, 'yyyy.MM.dd.')}"></span>
+          </span>
+        </div>
+      </a>
+      <button
+          th:data-post-id="${postDto.postId}"
+          onclick="toggleFavorite(this.getAttribute('data-post-id'))"
+          th:text="${postDto.favoriteStatus} == true ? '💙' : '🤍'"
+          type="button"
+      ></button>
+    </div>
+  </div>
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <script th:inline="javascript">
+
+    let isLast = [[${otherMemberInfo.postList.isLast}]];
+    let isLoading = false;
+    let lastModifiedTime = null; // 마지막 게시물 수정 시간 초기화
+
+    const Toast = Swal.mixin({
+      toast: true,
+      position: 'bottom-end',
+      showConfirmButton: false,
+      timer: 3000,
+      timerProgressBar: true,
+      didOpen: (toast) => {
+        toast.addEventListener('mouseenter', Swal.stopTimer)
+        toast.addEventListener('mouseleave', Swal.resumeTimer)
+      }
+    })
+
+    window.addEventListener("scroll", function () {
+
+      const lastPost = document.querySelector('.post-card:last-of-type');
+      if (lastPost) {
+        const modifiedTime = lastPost.getAttribute('data-modified-time');
+        if (modifiedTime) {
+          lastModifiedTime = modifiedTime;
+        }
+      }
+
+      const SCROLLED_HEIGHT = window.scrollY;
+      const WINDOW_HEIGHT = window.innerHeight;
+      const DOC_TOTAL_HEIGHT = document.body.offsetHeight;
+      const OFFSET = 200;
+      const IS_BOTTOM = (WINDOW_HEIGHT + SCROLLED_HEIGHT > DOC_TOTAL_HEIGHT - OFFSET);
+
+      if (IS_BOTTOM && !isLoading) {
+        loadMorePosts();
+      }
+    });
+
+    function loadMorePosts() {
+      isLoading = true;
+      let url = '/members/posts/more?cursorTime=' + lastModifiedTime;
+
+      if(!isLast) {
+
+        $.ajax({
+          url: url,
+          type: 'GET',
+          success: function(htmlFragment) {
+            $('.post-container').append(htmlFragment);
+            const isLastValue = $('.post-container .is-last').last().val() === 'true';
+            isLast = isLastValue;
+            updateLastModifiedTime(htmlFragment);
+            isLoading = false;
+          },
+          error: function() {
+            isLoading = false;
+          }
+        });
+      }
+
+      if(isLast) {
+        Toast.fire({
+          title: '더 이상\n불러올 게시글이 없습니다!',
+          icon: 'error'
+        });
+      }
+
+    }
+
+    function updateLastModifiedTime(htmlFragment) {
+      // HTML 조각을 임시 요소에 추가하여 파싱
+      const tempDiv = document.createElement('div');
+      tempDiv.innerHTML = htmlFragment;
+
+      // 마지막 게시물의 수정 시간 추출
+      const lastPost = tempDiv.querySelector('.post-card:last-of-type');
+      if (lastPost) {
+        const modifiedTime = lastPost.getAttribute('data-modified-time');
+        if (modifiedTime) {
+          lastModifiedTime = modifiedTime;
+        }
+      }
+    }
+
+    function toggleFavorite(postId) {
+      $.ajax({
+        url: '/posts/' + postId + '/favorite',
+        type: 'PATCH',
+        contentType: 'application/json; charset=utf-8',
+        success: function() {
+          location.reload()
+        }
+      });
+    }
+  </script>
+</div>
+</body>
+</html>
