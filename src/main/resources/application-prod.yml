@@ -24,7 +24,7 @@ spring:
 
   data:
     mongodb:
-      uri: localhost
+      uri: mongodb://localhost:27017/swapswap
 
     redis:
       host: localhost
