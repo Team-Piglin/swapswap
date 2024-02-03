@@ -24,6 +24,9 @@
     <a href="#ETC">기타중고물품</a>
   </div>
   <div class="post-container">
+    <div class="room-container" th:if="${postListResponseDto.postList().isEmpty()}">
+      <p class="post-no-result">검색 결과가 없습니다.</p>
+    </div>
     <div th:each="postDto : ${postListResponseDto.postList}" class="post-card"
          th:data-modified-time="${postDto.modifiedUpTime}">
       <a th:href="@{/posts/{postId}(postId=${postDto.postId})}">
