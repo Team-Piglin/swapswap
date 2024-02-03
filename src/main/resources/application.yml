@@ -3,4 +3,4 @@ spring:
     default: local
 
 logging:
-  config: classpath:log/logback.xml
+  config: classpath:./log/logback.xml
