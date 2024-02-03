@@ -12,6 +12,11 @@ spring:
       hibernate:
     open-in-view: false
 
+  data:
+    mongodb:
+      port: 27027
+      host: localhost
+
   servlet:
     multipart:
       max-file-size: 10MB
