@@ -2,7 +2,6 @@ package piglin.swapswap.domain.post.service;
 
 import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Map;
 import piglin.swapswap.domain.deal.constant.DealStatus;
 import piglin.swapswap.domain.member.entity.Member;
 import piglin.swapswap.domain.post.dto.request.PostCreateRequestDto;
@@ -28,7 +27,7 @@ public interface PostService {
      * @param member 익명사용자와 로그인 사용자의 화면을 나누기 위한 member 매개변수 입니다.
      * @return PostGetResponseDto 를 반환하여 Model 로 화면에 그려줍니다.
      */
-    PostGetResponseDto getPost(Long postId, Member member);
+    PostGetResponseDto getPostWithFavorite(Long postId, Member member);
 
     /**
      * 게시글 목록 조회 메소드입니다.
@@ -86,6 +85,7 @@ public interface PostService {
      * @param postId 매개변수로 받는 업 할 게시글의 고유 번호입니다.
      * @param member 업 할 게시글의 작성자인지 예외처리 해주기 위해 받는 멤버입니다.
      */
+
     void upPost(Long postId, Member member);
 
     /**
@@ -106,8 +106,6 @@ public interface PostService {
 
     List<PostSimpleResponseDto> getPostSimpleInfoList(Long memberId);
 
-    List<PostSimpleResponseDto> getPostSimpleInfoListByPostIdList(Map<Integer, Long> postIdList);
-
     void updatePostStatusByPostIdList(List<Long> postIdList, DealStatus dealStatus);
 
     List<Post> findByMemberId(Long memberId);
@@ -115,4 +113,6 @@ public interface PostService {
     void deleteAllPostByMember(Member loginMember);
 
     void reRegisterPostByMember(Member loginMember);
+
+    Post getPost(Long postId);
 }

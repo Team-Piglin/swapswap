@@ -12,10 +12,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import piglin.swapswap.domain.member.dto.MemberNicknameDto;
+import piglin.swapswap.domain.member.dto.OtherMemberInfoDto;
 import piglin.swapswap.domain.member.entity.Member;
 import piglin.swapswap.domain.member.service.KakaoServiceImpl;
 import piglin.swapswap.domain.member.service.MemberService;
@@ -95,7 +97,7 @@ public class MemberController {
     @GetMapping("/unregister")
     public String unregister(@AuthMember Member member, Model model) {
 
-        model.addAttribute("currentSwapMoney", memberService.getMySwapMoney(member.getId()));
+        model.addAttribute("currentSwapMoney", memberService.getMySwapMoney(member));
 
         return "member/unregister";
     }
@@ -134,8 +136,7 @@ public class MemberController {
             Model model
     ) {
 
-        Long mySwapMoney = memberService.getMySwapMoney(member.getId());
-
+        Long mySwapMoney = memberService.getMySwapMoney(member);
         model.addAttribute("mySwapMoney", mySwapMoney);
 
         return "member/mySwapMoney";
@@ -184,6 +185,15 @@ public class MemberController {
         model.addAttribute("postListResponseDto", responseDtoList);
 
         return "member/myPostList";
+    }
+
+    @GetMapping("/members/{memberId}")
+    public String getOtherMemberInfo(@PathVariable Long memberId, Model model,@RequestParam(required = false) LocalDateTime cursorTime) {
+
+        OtherMemberInfoDto otherMemberInfo = memberService.getOtherMemberInfo(memberId, cursorTime);
+        model.addAttribute("otherMemberInfo", otherMemberInfo);
+
+        return "member/otherMemberInfo";
     }
 
     @GetMapping("/members/posts/more")

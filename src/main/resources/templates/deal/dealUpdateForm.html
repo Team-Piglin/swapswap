@@ -1,4 +1,4 @@
-<!DOCTYPE HTML>
+ <!DOCTYPE HTML>
 <html xmlns:th="http://www.thymeleaf.org"
       xmlns:layout=http://www.ultraq.net.nz/thymeleaf/layout
       layout:decorate="~{common/layout/layout}">
@@ -9,103 +9,118 @@
   <input type="number" id="extraFee" placeholder="수정 할 나의 추가 요금 입력">
   <button
       th:data-deal-id="${dealId}"
+      th:data-bill-id="${billId}"
       th:data-member-id="${memberId}"
-      onclick="sendSelectPostList(this.getAttribute('data-deal-id'), this.getAttribute('data-member-id'))">
+      onclick="sendSelectPostList(this.getAttribute('data-deal-id'), this.getAttribute('data-bill-id'), this.getAttribute('data-member-id'))">
     요청하기
   </button>
-  <div id="postContainer"></div>
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script th:inline="javascript">
-
-    var selectedPostIds = []; // 선택된 게시글 ID들을 저장할 배열
-
-    function addActiveClassForPostButton(button) {
-      var postId = button.value.split(',')[0]; // 버튼 값에서 postId 추출
-      if (button.classList.contains('active')) {
-        button.classList.remove('active');
-        var index = selectedPostIds.indexOf(postId);
-        if (index > -1) {
-          selectedPostIds.splice(index, 1); // 선택 해제된 postId 제거
-        }
-      } else {
-        button.classList.add('active');
-        selectedPostIds.push(postId); // 선택된 postId 추가
-      }
-    }
-
-    function sendSelectPostList(dealId, memberId) {
-      var extraFeeInput = document.getElementById('extraFee').value;
-
-      // extraFee가 비어있거나 숫자가 아닌 경우를 확인하고 기본값 설정
-      var extraFee = extraFeeInput && !isNaN(extraFeeInput) ? parseInt(extraFeeInput) : 0;
-
-      var data = JSON.stringify({
-        extraFee: extraFee,
-        postIdList: selectedPostIds.map(Number) // postIdList 처리
-      });
-      console.log(dealId)
-      console.log(memberId)
-      console.log(data)
-
-      $.ajax({
-        url: '/deals/' + dealId + '/member/' + memberId,
-        type: 'PUT',
-        contentType: 'application/json; charset=utf-8',
-        data: data, // 데이터를 AJAX 요청과 함께 보냅니다.
-        success: function () {
-          location.href = '/deals/' + dealId; // 성공 시 페이지 리다이렉트
-        },
-        error: function (xhr, status, error) {
-          // 에러 처리
-          console.error("Update failed:", status, error);
-        }
-      });
-    }
-
-    function addActiveClassForSecondPostButton(target) {
-      if (target.classList.contains('active')) {
-        target.classList.remove('active');
-      } else {
-        target.classList.add('active');
-      }
-    }
-
-    window.onload = function loadPosts() {
-      var memberId = document.querySelector('.memberId').value;
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          var posts = JSON.parse(xhr.responseText);
-          console.log(posts);
-          // 페이지에 동적으로 출력
-          var container = document.getElementById('postContainer');
-
-          posts.forEach(function (post) {
-            var postDiv = document.createElement('div');
-            postDiv.innerText = post.postTitle;
-            container.appendChild(postDiv);
-
-            var img = document.createElement('img');
-            img.src = post.imageUrl;
-            img.alt = 'Post Image';
-            container.appendChild(img);
-
-            var button = document.createElement('button');
-            button.className = 'post-select-button';
-            button.value = post.postId + ',' + post.postTitle + ',' + post.imageUrl;
-            button.onclick = function () {
-              addActiveClassForPostButton(this);
-            };
-            button.innerText = '선택하기';
-            container.appendChild(button);
-          });
-        }
-      };
-      xhr.open("GET", "/posts/member/" + memberId, true);
-      xhr.send();
-    };
-
-  </script>
+  <div class="deal-update-post-container" id="postContainer"></div>
 </div>
 </body>
+<script layout:fragment="script">
+
+  var selectedPostIds = []; // 선택된 게시글 ID들을 저장할 배열
+
+  function addActiveClassForPostButton(button) {
+    var postId = button.value.split(',')[0]; // 버튼 값에서 postId 추출
+    if (button.classList.contains('active')) {
+      button.classList.remove('active');
+      button.innerText = '선택하기'; // active 클래스가 제거될 때 텍스트를 원래대로 변경
+      var index = selectedPostIds.indexOf(postId);
+      if (index > -1) {
+        selectedPostIds.splice(index, 1); // 선택 해제된 postId 제거
+      }
+    } else {
+      button.classList.add('active');
+      button.innerText = '선택됨!'; // active 클래스가 추가될 때 텍스트 변경
+      selectedPostIds.push(postId); // 선택된 postId 추가
+    }
+  }
+
+  function sendSelectPostList(dealId, billId, memberId) {
+    var extraFeeInput = document.getElementById('extraFee').value;
+
+    // extraFee가 비어있거나 숫자가 아닌 경우를 확인하고 기본값 설정
+    var extraFee = extraFeeInput && !isNaN(extraFeeInput) ? parseInt(extraFeeInput) : 0;
+
+    var data = JSON.stringify({
+      extraFee: extraFee,
+      postIdList: selectedPostIds.map(Number) // postIdList 처리
+    });
+    console.log("dealID:::")
+    console.log(dealId)
+    console.log("memberID:::")
+    console.log(memberId)
+    console.log("data:::")
+    console.log(data)
+
+    $.ajax({
+      url: '/bills/' + billId + '/member/' + memberId,
+      type: 'PUT',
+      contentType: 'application/json; charset=utf-8',
+      data: data, // 데이터를 AJAX 요청과 함께 보냅니다.
+      success: function () {
+        location.href = '/deals/' + dealId; // 성공 시 페이지 리다이렉트
+      },
+      error: function (xhr, status, error) {
+        // 에러 처리
+        console.error("Update failed:", status, error);
+      }
+    });
+  }
+
+  function addActiveClassForReceivePostButton(target) {
+    if (target.classList.contains('active')) {
+      target.classList.remove('active');
+    } else {
+      target.classList.add('active');
+    }
+  }
+
+  window.onload = function loadPosts() {
+    var memberId = document.querySelector('.memberId').value;
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        var posts = JSON.parse(xhr.responseText);
+        console.log(posts);
+        // 페이지에 동적으로 출력
+        var container = document.getElementById('postContainer');
+
+        posts.forEach(function (post) {
+          // 각 게시물을 담을 div 생성
+          var postDiv = document.createElement('div');
+          postDiv.className = 'post-item'; // CSS 클래스 추가(스타일 지정에 사용)
+
+          // 제목을 담을 div 생성 및 추가
+          var titleDiv = document.createElement('div');
+          titleDiv.innerText = post.postTitle;
+          titleDiv.className = 'post-item-title';
+          postDiv.appendChild(titleDiv);
+
+          // 이미지를 담을 img 요소 생성 및 추가
+          var img = document.createElement('img');
+          img.alt = 'Post Image';
+          img.src = post.imageUrl;
+          postDiv.appendChild(img);
+
+          // 버튼을 담을 button 요소 생성 및 추가
+          var button = document.createElement('button');
+          button.className = 'post-select-button';
+          button.value = post.postId + ',' + post.postTitle + ',' + post.imageUrl;
+          button.onclick = function () {
+            addActiveClassForPostButton(this);
+          };
+          button.innerText = '선택하기';
+          postDiv.appendChild(button);
+
+          // 생성된 postDiv를 container에 추가
+          container.appendChild(postDiv);
+        });
+      }
+    };
+    xhr.open("GET", "/posts/member/" + memberId, true);
+    xhr.send();
+  };
+</script>
 </html>

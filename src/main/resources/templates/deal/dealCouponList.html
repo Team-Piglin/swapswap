@@ -1,0 +1,84 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout=http://www.ultraq.net.nz/thymeleaf/layout
+      layout:decorate="~{common/layout/layout}">
+<body>
+<div class="coupon-body" layout:fragment="content">
+  <input hidden="hidden" th:value="${billId}" class="bill-id">
+  <input hidden="hidden" th:value="${dealId}" class="deal-id">
+  <div class="coupon-list-box">쿠폰함</div>
+  <div th:each="myCouponGetResponseDto : ${myCouponDtoList}" class="coupon-card">
+    <div class="coupon-card-body">
+      <input type="hidden" th:value="${myCouponGetResponseDto.couponId()}" class="coupon-id">
+      <h2 class="card-title" th:text="${myCouponGetResponseDto.couponName()}"></h2>
+      <h2 class="card-title" th:text="${myCouponGetResponseDto.couponType()}"></h2>
+      <p class="card-text">
+        수수료 할인율: <span th:text="${myCouponGetResponseDto.discountPercentage()}"></span>%<br>
+        만료 기한: <span th:text="${myCouponGetResponseDto.expiredTime()}"></span>
+      </p>
+    </div>
+  </div>
+  <div class="coupon-use-body">
+    <button id="use-coupon" class="coupon-btn">사용하기</button>
+    <button class="coupon-btn" th:onclick="|location.href='@{/bills/{billId}(billId=${billId})}/allow/swap-pay/true'|">취소하기</button>
+  </div>
+</div>
+</body>
+<script layout:fragment="script">
+
+  document.querySelectorAll('.coupon-card').forEach(function(element) {
+    element.addEventListener('click', function() {
+      if(element.classList.contains('select-coupon')){
+        element.classList.remove('select-coupon');
+      }else {
+        element.classList.add('select-coupon');
+      }
+    });
+  });
+
+
+  document.getElementById('use-coupon').addEventListener('click', function () {
+    var selectedCouponIds = [];
+
+    var selectedCoupons = document.querySelectorAll('.select-coupon');
+
+    selectedCoupons.forEach(function (selectedCoupon) {
+      var couponIdInput = selectedCoupon.querySelector('.coupon-id');
+      if (couponIdInput) {
+        selectedCouponIds.push(couponIdInput.value);
+      }
+    });
+
+    var billId = document.querySelector('.bill-id').value;
+
+    fetch(`/bills/coupons/${billId}`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ selectedCouponIdList: selectedCouponIds }),
+    })
+    .then(response => {
+      if (response.ok) {
+        // Successful response
+
+        return response.text();
+      } else {
+        // Handle error response
+        throw new Error('같은 종류의 쿠폰은 2개 이상 사용 할 수 없습니다.');
+      }
+    })
+    .then(data => {
+      console.log('Server response:', data);
+      // Assuming data contains "쿠폰 사용 성공" on success
+      var billId = document.querySelector('.bill-id').value;
+      window.location.href = `/bills/${billId}/allow/swap-pay/true`;  // Redirect on success
+    })
+    .catch(error => {
+      alert(error.message);
+      console.error('Error:', error);
+      // Handle error, you may want to show an error message to the user
+    });
+  });
+</script>
+</html>

@@ -27,20 +27,20 @@ public class DealWallet extends BaseTime {
     private Long id;
 
     @Column
-    private Long firstSwapMoney;
+    private Long RequestMemberSwapMoney;
 
     @Column
-    private Long secondSwapMoney;
+    private Long ReceiveMemberSwapMoney;
 
     @OneToOne(optional = false)
     @JoinColumn(name = "deal_id", nullable = false)
     private Deal deal;
 
-    public void updateFirstSwapMoney(Long swapMoney) {
-        this.firstSwapMoney = swapMoney;
+    public void updateRequestMemberSwapMoney(Long swapMoney) {
+        this.RequestMemberSwapMoney = swapMoney;
     }
 
-    public void updateSecondSwapMoney(Long swapMoney) {
-        this.secondSwapMoney = swapMoney;
+    public void updateReceiveMemberSwapMoney(Long swapMoney) {
+        this.ReceiveMemberSwapMoney = swapMoney;
     }
 }

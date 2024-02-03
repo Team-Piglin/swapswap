@@ -1,14 +1,22 @@
 package piglin.swapswap.domain.deal.repository;
 
 import java.util.List;
-import piglin.swapswap.domain.deal.dto.response.DealDetailResponseDto;
-import piglin.swapswap.domain.deal.dto.response.DealGetResponseDto;
+import java.util.Optional;
+import piglin.swapswap.domain.deal.entity.Deal;
 
 public interface DealQueryRepository {
 
-    List<DealGetResponseDto> findAllMyDealRequest(Long memberId);
+    List<Deal> findAllMyRequestDeal(Long memberId);
 
-    List<DealGetResponseDto> findAllMyDealResponse(Long memberId);
+    List<Deal> findAllMyReceiveDeal(Long memberId);
 
-    DealDetailResponseDto findDealByIdToDetailResponseDto(Long dealId);
+    List<Deal> findAllMyDeal(Long memberId);
+
+    Optional<Deal> findDealByIdWithBillAndMember(Long dealId);
+
+    Optional<Deal> findDealByBillId(Long billId);
+
+    Optional<Deal> findByBillIdWithBillAndMember(Long billId);
+
+    Optional<Deal> findByBillIdWithBill(Long billId);
 }

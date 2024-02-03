@@ -1,8 +1,10 @@
 package piglin.swapswap.global.exception.common;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataAccessException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConversionException;
 import org.springframework.validation.BindException;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.view.RedirectView;
+import piglin.swapswap.global.exception.coupon.DuplicateCouponTypeException;
 import piglin.swapswap.global.exception.ajax.AjaxRequestException;
 import piglin.swapswap.global.exception.jwt.JwtInvalidException;
 import piglin.swapswap.global.exception.jwt.NoJwtException;
@@ -22,6 +25,17 @@ import piglin.swapswap.global.exception.jwt.UnsupportedGrantTypeException;
 @Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+    @ResponseBody
+    @ExceptionHandler(DuplicateCouponTypeException.class)
+    protected ResponseEntity<ErrorResponse> handleDuplicateCouponTypeException(
+            DuplicateCouponTypeException e) {
+
+        ErrorResponse errorResponse = ErrorResponse.of(HttpStatus.BAD_REQUEST,
+                List.of(e.getMessage()));
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     protected RedirectView handleValidationException(

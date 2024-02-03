@@ -18,6 +18,8 @@
       var nicknameSpan = document.querySelector('.edit_nickname');
       var originalNickname = nicknameSpan.innerText.trim();
 
+
+
       document.querySelector('#nicknameLink').addEventListener('click', function (event) {
         var newNickname = nicknameSpan.innerText.trim();
 
@@ -76,7 +78,7 @@
             console.error(xhr);
           };
           xhr.send();
-        } else {
+        }  else {
           swal({
             title: '알림',
             text: '닉네임은 특수 문자를 제외한 \n2자 이상 15자 이내로 설정해주세요',

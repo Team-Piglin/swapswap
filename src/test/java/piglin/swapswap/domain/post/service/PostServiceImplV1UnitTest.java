@@ -174,7 +174,7 @@ class PostServiceImplV1UnitTest {
                 when(postRepository.findPostWithFavorite(postId, member)).thenReturn(
                         normalResponseDto);
                 // When
-                PostGetResponseDto result = postService.getPost(postId, member);
+                PostGetResponseDto result = postService.getPostWithFavorite(postId, member);
                 // Then
                 assertThat(result).isNotNull();
                 assertThat(result.author()).isEqualTo(author);
@@ -194,7 +194,7 @@ class PostServiceImplV1UnitTest {
                 when(postRepository.findPostWithFavorite(postId, notLoginMember)).thenReturn(
                         normalResponseDto);
                 // When
-                PostGetResponseDto result = postService.getPost(postId, notLoginMember);
+                PostGetResponseDto result = postService.getPostWithFavorite(postId, notLoginMember);
                 // Then
                 assertThat(result).isNotNull();
                 assertThat(result.author()).isEqualTo(author);
@@ -222,7 +222,7 @@ class PostServiceImplV1UnitTest {
             when(postRepository.findPostWithFavorite(postId, member)).thenReturn(nullResponseDto);
 
             // When - Then
-            assertThatThrownBy(() -> postService.getPost(postId, member))
+            assertThatThrownBy(() -> postService.getPostWithFavorite(postId, member))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining(ErrorCode.NOT_FOUND_POST_EXCEPTION.getMessage());
         }

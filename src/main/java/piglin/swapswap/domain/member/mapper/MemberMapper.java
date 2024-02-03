@@ -1,8 +1,11 @@
 package piglin.swapswap.domain.member.mapper;
 
+import java.time.LocalDateTime;
 import piglin.swapswap.domain.member.constant.MemberRole;
+import piglin.swapswap.domain.member.dto.OtherMemberInfoDto;
 import piglin.swapswap.domain.member.dto.SocialUserInfo;
 import piglin.swapswap.domain.member.entity.Member;
+import piglin.swapswap.domain.post.dto.response.PostListResponseDto;
 import piglin.swapswap.domain.wallet.entity.Wallet;
 
 public class MemberMapper {
@@ -17,4 +20,15 @@ public class MemberMapper {
                 .wallet(wallet)
                 .build();
     }
+
+    public static OtherMemberInfoDto createOtherMemberInfoDto(String nickname,
+            LocalDateTime createdTime, PostListResponseDto postList) {
+
+        return OtherMemberInfoDto.builder()
+                .nickname(nickname)
+                .createdTime(createdTime)
+                .postList(postList)
+                .build();
+    }
+
 }

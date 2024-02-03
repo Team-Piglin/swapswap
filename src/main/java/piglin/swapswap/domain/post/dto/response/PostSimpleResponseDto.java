@@ -5,5 +5,4 @@ import lombok.Builder;
 @Builder
 public record PostSimpleResponseDto(Long postId, String postTitle, String imageUrl) {
 
-
 }

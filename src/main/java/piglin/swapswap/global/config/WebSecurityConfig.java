@@ -34,6 +34,7 @@ public class WebSecurityConfig {
             "/",
             "/posts/**",
             "/search/**",
+            "/members/**"
     };
 
     @Bean
