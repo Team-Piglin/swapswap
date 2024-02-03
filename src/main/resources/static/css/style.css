@@ -1,9 +1,11 @@
+@import url("https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css");
+
 @font-face {
-  font-family: 'S-CoreDream-3Light';
-  src: url('https://cdn.jsdelivr.net/gh/projectnoonnu/noonfonts_six@1.2/S-CoreDream-3Light.woff') format('woff');
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard Variable", Pretendard, Roboto, "Noto Sans KR", "Segoe UI", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
   font-weight: normal;
   font-style: normal;
 }
+
 
 .swal-title {
   font-size: 18px;
@@ -20,7 +22,7 @@
 }
 
 body {
-  font-family: 'S-CoreDream-3Light';
+  font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo", "Pretendard Variable", Pretendard, Roboto, "Noto Sans KR", "Segoe UI", "Malgun Gothic", "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", sans-serif;
 }
 
 .header {
@@ -645,6 +647,10 @@ img {
   color: #333;
 }
 
+.author-details span {
+  cursor: pointer;
+}
+
 .post-title-meta-section {
   padding: 20px;
 }
@@ -785,6 +791,13 @@ img {
 .myPage_profile .myPage_profile_title {
   width: 500px;
   margin-bottom: 40px;
+  font-size: 25px;
+  font-weight: 900;
+  border-bottom: 1px solid #ccc;
+}
+
+.myPage_profile .otherPage_profile_title {
+  width: 500px;
   font-size: 25px;
   font-weight: 900;
   border-bottom: 1px solid #ccc;
