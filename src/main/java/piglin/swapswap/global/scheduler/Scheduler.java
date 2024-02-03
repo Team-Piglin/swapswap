@@ -38,7 +38,7 @@ public class Scheduler {
         LocalDateTime fourteenDaysAgo = LocalDateTime.now().minusDays(14);
 
         walletHistoryRepository.deleteAllByIsDeletedIsTrueAndModifiedTimeBefore(fourteenDaysAgo);
-        memberCouponRepository.deleteAllByIsDeletedIsTrueAndModifiedTimeBefore(fourteenDaysAgo);
+        memberCouponRepository.deleteAllByIsUsedIsTrueAndModifiedTimeBefore(fourteenDaysAgo);
         chatRoomRepository.deleteAllByIsDeletedIsTrueAndModifiedTimeBefore(fourteenDaysAgo);
         favoriteRepository.deleteAllByIsDeletedIsTrueAndModifiedTimeBefore(fourteenDaysAgo);
 

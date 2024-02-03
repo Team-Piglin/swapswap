@@ -1,339 +1,193 @@
 package piglin.swapswap.domain.deal.service;
 
-import java.util.ArrayList;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import piglin.swapswap.domain.bill.entity.Bill;
+import piglin.swapswap.domain.bill.service.BillService;
+import piglin.swapswap.domain.billcoupon.dto.BillCouponResponseDto;
+import piglin.swapswap.domain.billcoupon.service.BillCouponService;
+import piglin.swapswap.domain.billpost.dto.BillPostResponseDto;
+import piglin.swapswap.domain.billpost.service.BillPostService;
 import piglin.swapswap.domain.daelwallet.service.DealWalletService;
 import piglin.swapswap.domain.deal.constant.DealStatus;
 import piglin.swapswap.domain.deal.dto.request.DealCreateRequestDto;
-import piglin.swapswap.domain.deal.dto.request.DealUpdateRequestDto;
 import piglin.swapswap.domain.deal.dto.response.DealDetailResponseDto;
-import piglin.swapswap.domain.deal.dto.response.DealGetResponseDto;
+import piglin.swapswap.domain.deal.dto.response.DealGetReceiveDto;
+import piglin.swapswap.domain.deal.dto.response.DealGetRequestDto;
 import piglin.swapswap.domain.deal.dto.response.DealHistoryResponseDto;
 import piglin.swapswap.domain.deal.entity.Deal;
 import piglin.swapswap.domain.deal.mapper.DealMapper;
 import piglin.swapswap.domain.deal.repository.DealRepository;
 import piglin.swapswap.domain.member.entity.Member;
-import piglin.swapswap.domain.member.repository.MemberRepository;
+import piglin.swapswap.domain.member.service.MemberService;
 import piglin.swapswap.domain.notification.constant.NotificationType;
 import piglin.swapswap.domain.notification.service.NotificationService;
-import piglin.swapswap.domain.post.service.PostService;
+import piglin.swapswap.global.annotation.SwapLog;
 import piglin.swapswap.global.exception.common.BusinessException;
 import piglin.swapswap.global.exception.common.ErrorCode;
+import piglin.swapswap.global.exception.deal.InvalidDealRequestException;
 
 @Service
+@Slf4j
 @RequiredArgsConstructor
 public class DealServiceImplV1 implements DealService {
 
-
     private final DealRepository dealRepository;
-    private final MemberRepository memberRepository;
-    private final DealWalletService dealWalletService;
-    private final PostService postService;
+    private final BillService billService;
+    private final BillPostService billPostService;
+    private final BillCouponService billCouponService;
+    private final MemberService memberService;
     private final NotificationService notificationService;
+    private final DealWalletService dealWalletService;
 
     @Override
+    @SwapLog
+    @Transactional
     public Long createDeal(Member member, DealCreateRequestDto requestDto) {
 
-        existMember(requestDto.secondMemberId());
+        log.info("createDeal - requestMemberId: {}", member.getId());
+        if (requestDto.requestPostIdList().isEmpty() && requestDto.receivePostIdList().isEmpty()) {
+            throw new InvalidDealRequestException(ErrorCode.BOTH_POST_ID_LIST_EMPTY_EXCEPTION);
+        }
 
-        Member firstMember = memberRepository.findById(member.getId())
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_USER_EXCEPTION));
+        Bill requestMemberBill = billService.createBill(member, requestDto.requestMemberExtraFee(),
+                requestDto.requestPostIdList());
 
-        Member secondMember = memberRepository.findById(requestDto.secondMemberId())
-                .orElseThrow(() ->  new BusinessException(ErrorCode.NOT_FOUND_USER_EXCEPTION));
+        Member receiveMember = memberService.getMember(requestDto.receiveMemberId());
 
-        Deal deal = DealMapper.createDeal(requestDto, firstMember.getId());
+        Bill receiveMemberBill = billService.createBill(receiveMember, requestDto.receiveMemberExtraFee(),
+                requestDto.receivePostIdList());
 
-        Deal savedDeal = dealRepository.save(deal);
-
+        Deal deal = DealMapper.createDeal(requestMemberBill, receiveMemberBill);
+        log.info("BillIdAfterCreateDeal - requestMemberBillId: {} | receiveMemberBillId: {}", deal.getRequestMemberbill().getId(), deal.getReceiveMemberbill().getId());
         String Url = "http://swapswap.shop/deals/" + deal.getId();
-        String content = secondMember.getNickname()+"님! 거래 요청이 왔어요!";
-        notificationService.send(secondMember, NotificationType.DEAL,content,Url);
+        String content = receiveMember.getNickname()+"님! 거래 요청이 왔어요!";
+        notificationService.send(receiveMember, NotificationType.DEAL,content,Url);
 
-        return savedDeal.getId();
+        dealRepository.save(deal);
+        log.info("dealId: {}", deal.getId());
+        return deal.getId();
     }
 
     @Override
-    public List<DealGetResponseDto> getMyRequestDealList(Long memberId) {
+    public List<DealGetRequestDto> getMyRequestDealList(Long memberId) {
 
-        return dealRepository.findAllMyDealRequest(memberId);
+        List<Deal> myRequestDealList = dealRepository.findAllMyRequestDeal(memberId);
+
+        return DealMapper.toDealGetRequestDtoList(myRequestDealList);
     }
 
     @Override
-    public List<DealGetResponseDto> getMyResponseDealList(Long memberId) {
+    public List<DealGetReceiveDto> getMyReceiveDealList(Long memberId) {
 
-        return dealRepository.findAllMyDealResponse(memberId);
+        List<Deal> myReceiveDealList = dealRepository.findAllMyReceiveDeal(memberId);
+
+        return DealMapper.toDealGetReceiveDtoList(myReceiveDealList);
     }
 
     @Override
     public DealDetailResponseDto getDeal(Long dealId, Member member) {
 
-        DealDetailResponseDto responseDto = dealRepository.findDealByIdToDetailResponseDto(dealId);
-
-        isNullDealDetailResponseDto(responseDto);
-
-        return responseDto;
-    }
-
-    @Override
-    @Transactional
-    public void updateDeal(Member member, Long dealId, Long memberId, DealUpdateRequestDto requestDto) {
-
-        Deal deal = findDeal(dealId);
-
-        if (!deal.getFirstUserId().equals(member.getId()) && !deal.getSecondUserId().equals(member.getId())) {
-            throw new RuntimeException("딜을 수정할 수 있는 권한이 없어요~");
-        }
-
-        if (deal.getDealStatus().equals(DealStatus.DEALING) || deal.getDealStatus().equals(DealStatus.COMPLETED)) {
-            throw new RuntimeException("딜을 수정할 수 없는 상태입니다~");
-        }
-
-        if (dealWalletService.existsDealWallet(dealId)) {
-
-            dealWalletService.withdrawMemberSwapMoneyAtDealUpdate(deal);
-        }
-
-        if (deal.getFirstUserId().equals(memberId)) {
-            DealMapper.updateDealFirst(deal, requestDto);
-        }
-
-        if (deal.getSecondUserId().equals(memberId)) {
-            DealMapper.updateDealSecond(deal, requestDto);
-        }
-    }
-
-    @Override
-    public void checkDeal(Long dealId) {
-
-        dealRepository.findById(dealId).orElseThrow(
+        Deal deal = dealRepository.findDealByIdWithBillAndMember(dealId).orElseThrow(
                 () -> new BusinessException(ErrorCode.NOT_FOUND_DEAL_EXCEPTION)
         );
+
+        Bill requestMemberBill = deal.getRequestMemberbill();
+        Bill receiveMemberBill = deal.getReceiveMemberbill();
+
+        if (!requestMemberBill.getMember().getId().equals(member.getId())
+                &&!receiveMemberBill.getMember().getId().equals(member.getId())) {
+            throw new BusinessException(ErrorCode.NOT_CONTAIN_DEAL_MEMBER_EXCEPTION);
+        }
+
+        List<BillPostResponseDto> requestBillPostDtoList = billPostService.getBillPostDtoList(
+                requestMemberBill);
+        List<BillPostResponseDto> receiveBillPostDtoList = billPostService.getBillPostDtoList(
+                receiveMemberBill);
+
+        List<BillCouponResponseDto> requestBillCouponDtoList = billCouponService.getBillCouponDtoList(
+                requestMemberBill);
+        List<BillCouponResponseDto> receiveBillCouponDtoList = billCouponService.getBillCouponDtoList(
+                receiveMemberBill);
+
+        return DealMapper.toDealDetailResponseDto(deal, requestBillPostDtoList,
+                receiveBillPostDtoList, requestBillCouponDtoList, receiveBillCouponDtoList);
     }
 
     @Override
     @Transactional
-    public void updateDealAllow(Long dealId, Member member) {
+    public void bothAllowThenChangeDealing(Long billId) {
 
-        Deal deal = findDeal(dealId);
+        Deal deal = getDealByBillIdWithBill(billId);
 
-        if (isNotDealStatusRequested(deal.getDealStatus())) {
-            throw new BusinessException(ErrorCode.CAN_NOT_UPDATE_ALLOW_STATUS);
-        }
+        if(deal.getRequestMemberbill().getIsAllowed() && deal.getReceiveMemberbill().getIsAllowed()) {
 
-        if (isFirstMember(deal.getFirstUserId(), member.getId())) {
-            updateFirstMemberToAllow(deal, member);
-        }
-
-        if (isSecondMember(deal.getSecondUserId(), member.getId())) {
-            updateSecondMemberToAllow(deal, member);
-        }
-
-        if(isBothAllow(deal)) {
             deal.updateDealStatus(DealStatus.DEALING);
-
-            List<Long> postIdList = getDealPostIdList(deal);
-
-            postService.updatePostStatusByPostIdList(postIdList, DealStatus.DEALING);
         }
     }
 
     @Override
+    @SwapLog
     @Transactional
-    public void takeDeal(Long dealId, Member member) {
+    public void bothTakeThenChangeCompleted(Long billId) {
 
-        Deal deal = findDeal(dealId);
+        Deal deal = getDealByBillIdWithBill(billId);
+        log.info("dealId: {} | originalDealStatus: {}", deal.getId(), deal.getDealStatus());
 
-        if (!deal.getDealStatus().equals(DealStatus.DEALING)) {
-            throw new RuntimeException("인수 할 수 있는 상태가 아닙니다.");
-        }
-
-        if(deal.getFirstUserId().equals(member.getId())) {
-            deal.updateDealFirstMemberTake();
-        }
-
-        if(deal.getSecondUserId().equals(member.getId())) {
-            deal.updateDealSecondMemberTake();
-        }
-
-        if(deal.getFirstTake() && deal.getSecondTake()) {
-
-            if (dealWalletService.existsDealWallet(dealId)) {
-                dealWalletService.withdrawMemberSwapMoneyAtComplete(deal);
-            }
+        if(deal.getRequestMemberbill().getIsTaked() && deal.getReceiveMemberbill().getIsTaked()) {
 
             deal.updateDealStatus(DealStatus.COMPLETED);
+            deal.completedTime();
+            log.info("dealId: {} | updatedDealStatus: {} | updatedDealCompletedTime: {}", deal.getId(), deal.getDealStatus(), deal.getCompletedDealTime());
 
-            List<Long> postIdList = new ArrayList<>();
-            for(int i = 0; i<deal.getFirstPostIdList().size(); i++){
-                postIdList.add(deal.getFirstPostIdList().get(i));
+            if(dealWalletService.existDealWalletByDealId(deal.getId())) {
+                dealWalletService.withdrawMemberSwapMoneyAtComplete(deal);
             }
-            for(int i = 0; i<deal.getSecondPostIdList().size(); i++){
-                postIdList.add(deal.getSecondPostIdList().get(i));
-            }
-
-            postService.updatePostStatusByPostIdList(postIdList, DealStatus.COMPLETED);
-        }
-
-        if(!deal.getFirstTake() || !deal.getSecondTake()) {
-            deal.updateDealStatus(DealStatus.DEALING);
         }
     }
-
-    @Override
-    @Transactional
-    public void updateDealSwapMoneyIsUsing(Long dealId, Member member){
-        Deal deal = findDeal(dealId);
-
-        if (!deal.getDealStatus().equals(DealStatus.REQUESTED)) {
-            throw new BusinessException(ErrorCode.CAN_NOT_UPDATE_ALLOW_STATUS);
-        }
-
-        if(deal.getFirstUserId().equals(member.getId())) {
-            if(deal.getFirstAllow()) {
-                throw new BusinessException(ErrorCode.CAN_NOT_UPDATE_ALLOW_STATUS);
-            }
-            deal.updateDealFirstMemberSwapMoneyUsing();
-        }
-
-        if(deal.getSecondUserId().equals(member.getId())) {
-            if(deal.getSecondAllow()) {
-                throw new BusinessException(ErrorCode.CAN_NOT_UPDATE_ALLOW_STATUS);
-            }
-            deal.updateDealSecondMemberSwapMoneyUsing();
-        }
-    }
-
 
     @Override
     public List<DealHistoryResponseDto> getDealHistoryList(Long memberId) {
 
-        List<Deal> dealList = dealRepository.findAllByFirstUserIdOrSecondUserId(
-                memberId, memberId);
+        List<Deal> myAllDealList = dealRepository.findAllMyDeal(memberId);
 
-        return DealMapper.getDealHistory(dealList);
+        return DealMapper.getDealHistory(myAllDealList);
     }
 
-    private Deal findDeal(Long dealId) {
+    @Override
+    public Long getDealIdByBillId(Long billId) {
 
-        return dealRepository.findById(dealId).orElseThrow(
+        Deal deal = dealRepository.findDealByBillId(billId).orElseThrow(
+                () -> new BusinessException(ErrorCode.NOT_FOUND_DEAL_EXCEPTION)
+        );
+
+        return deal.getId();
+    }
+
+    @Override
+    public Deal getDealByBillIdWithBill(Long billId) {
+
+        return dealRepository.findByBillIdWithBill(billId).orElseThrow(
                 () -> new BusinessException(ErrorCode.NOT_FOUND_DEAL_EXCEPTION)
         );
     }
 
-    private void isNullDealDetailResponseDto(DealDetailResponseDto responseDto) {
+    @Override
+    public Deal getDealByBillIdWithBillAndMember(Long billId) {
 
-        if (responseDto.id() == null) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_DEAL_EXCEPTION);
-        }
+        return dealRepository.findByBillIdWithBillAndMember(billId).orElseThrow(
+                () -> new BusinessException(ErrorCode.NOT_FOUND_DEAL_EXCEPTION)
+        );
     }
 
-    private void existMember(Long memberId) {
+    @Override
+    public void isDifferentMember(Member member, Long receiveMemberId) {
 
-        if (!memberRepository.existsByIdAndIsDeletedIsFalse(memberId)) {
-            throw new BusinessException(ErrorCode.NOT_FOUND_POST_EXCEPTION);
+        if (member.getId().equals(receiveMemberId)) {
+            throw new BusinessException(ErrorCode.REQUEST_ONLY_DIFFERENT_USER_EXCEPTION);
         }
-    }
-
-    private boolean isNotDealStatusRequested(DealStatus dealStatus) {
-
-        return !dealStatus.equals(DealStatus.REQUESTED);
-    }
-
-    private boolean isFirstMember(Long firstMemberId, Long loginMemberId) {
-
-        return firstMemberId.equals(loginMemberId);
-    }
-
-    private boolean isSecondMember(Long secondMemberId, Long loginMemberId) {
-
-        return secondMemberId.equals(loginMemberId);
-    }
-
-    private void updateFirstMemberToAllow(Deal deal, Member member) {
-
-        deal.updateDealFirstMemberAllow();
-
-        Long firstExtraFee = null;
-
-        if(deal.getFirstExtraFee() != null) {
-            firstExtraFee = deal.getFirstExtraFee();
-        }
-
-        if(deal.getIsFirstSwapMoneyUsed()) {
-            if (dealWalletService.existsDealWallet(deal.getId()) ) {
-
-                if (deal.getFirstAllow()) {
-                    dealWalletService.updateDealWallet(deal, member, firstExtraFee);
-                }
-
-                if (!deal.getFirstAllow()) {
-                    dealWalletService.withdrawMemberSwapMoneyAtUpdate(deal, member);
-                }
-            }
-
-            if (!dealWalletService.existsDealWallet(deal.getId())) {
-
-                if (deal.getFirstAllow()) {
-                    if (deal.getFirstExtraFee() != null) {
-                        dealWalletService.createDealWallet(deal, member, firstExtraFee);
-                    }
-                }
-            }
-        }
-    }
-
-    private void updateSecondMemberToAllow(Deal deal, Member member) {
-
-        deal.updateDealSecondMemberAllow();
-
-        Long secondExtraFee = null;
-
-        if(deal.getSecondExtraFee() != null) {
-            secondExtraFee = deal.getSecondExtraFee();
-        }
-
-        if(deal.getIsSecondSwapMoneyUsed()) {
-            if (dealWalletService.existsDealWallet(deal.getId()) ) {
-
-                if (deal.getSecondAllow()) {
-                    dealWalletService.updateDealWallet(deal, member, secondExtraFee);
-                }
-
-                if (!deal.getSecondAllow()) {
-                    dealWalletService.withdrawMemberSwapMoneyAtUpdate(deal, member);
-                }
-            }
-
-            if (!dealWalletService.existsDealWallet(deal.getId())) {
-
-                if (deal.getSecondAllow()) {
-                    if (deal.getSecondExtraFee() != null) {
-                        dealWalletService.createDealWallet(deal, member, secondExtraFee);
-                    }
-                }
-            }
-        }
-    }
-
-    private boolean isBothAllow(Deal deal) {
-
-        return deal.getFirstAllow() && deal.getSecondAllow();
-    }
-
-    private List<Long> getDealPostIdList(Deal deal) {
-
-        List<Long> postIdList = new ArrayList<>();
-        for(int i = 0; i<deal.getFirstPostIdList().size(); i++){
-            postIdList.add(deal.getFirstPostIdList().get(i));
-        }
-        for(int i = 0; i<deal.getSecondPostIdList().size(); i++){
-            postIdList.add(deal.getSecondPostIdList().get(i));
-        }
-
-        return postIdList;
     }
 }

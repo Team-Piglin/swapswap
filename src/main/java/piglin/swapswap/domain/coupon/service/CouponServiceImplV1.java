@@ -13,6 +13,7 @@ import piglin.swapswap.domain.coupon.repository.CouponRepository;
 import piglin.swapswap.domain.coupon.validator.CouponValidator;
 import piglin.swapswap.domain.member.entity.Member;
 import piglin.swapswap.domain.membercoupon.service.MemberCouponService;
+import piglin.swapswap.global.annotation.Retry;
 import piglin.swapswap.global.annotation.SwapLog;
 import piglin.swapswap.global.exception.common.BusinessException;
 import piglin.swapswap.global.exception.common.ErrorCode;
@@ -31,7 +32,6 @@ public class CouponServiceImplV1 implements CouponService {
 
         CouponValidator.validateExpiredTime(couponCreateRequestDto.expiredTime());
 
-        // TODO 추후에 어드민 검증해야함.
         Coupon coupon = CouponMapper.createCoupon(couponCreateRequestDto);
 
         Coupon savedCoupon = couponRepository.save(coupon);
@@ -48,28 +48,11 @@ public class CouponServiceImplV1 implements CouponService {
         return coupon.getCount();
     }
 
-    @Override
+    @Retry
     @SwapLog
-    @Transactional
-    public void issueEventCouponByPessimisticLock(Long couponId, Member member) {
-
-        log.info("\ncouponIssueStart - Member: {} | couponId: {} | transactionActive: {}", member.getEmail(), couponId,
-                TransactionSynchronizationManager.isActualTransactionActive());
-
-        Coupon coupon = couponRepository.findByIdWithPessimisticLock(couponId)
-                .orElseThrow(() -> new BusinessException(ErrorCode.NOT_FOUND_COUPON_EXCEPTION));
-        log.info("\ncouponName: {} | couponType: {} | couponCountBeforeIssue: {}", coupon.getName(), coupon.getCouponType(), coupon.getCount());
-
-        log.info("\nissueCouponPossible: {}", issueCouponPossible(coupon));
-        if (issueCouponPossible(coupon)) {
-            memberCouponService.saveMemberCoupon(member, coupon);
-            coupon.issueCoupon();
-            log.info("\ncouponCountAfterIssue: {}", coupon.getCount());
-        }
-    }
-
     @Override
-    public void issueEventCouponByOptimisticLock(Long couponId, Member member) {
+    @Transactional
+    public void issueEventCoupon(Long couponId, Member member) {
 
         log.info("\ncouponIssue - member: {} | couponId: {} | transactionActive: {}", member.getEmail(), couponId,
                 TransactionSynchronizationManager.isActualTransactionActive());

@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 import piglin.swapswap.domain.coupon.constant.CouponType;
 import piglin.swapswap.domain.coupon.dto.request.CouponCreateRequestDto;
 import piglin.swapswap.domain.coupon.entity.Coupon;
@@ -39,7 +40,10 @@ class CouponServiceTest {
     @Autowired
     CouponRepository couponRepository;
 
-    static int COUPON_COUNT = 5;
+    @Autowired
+    RedisTemplate<String, Integer> redisTemplate;
+
+    static int COUPON_COUNT = 100;
     static Long couponId;
     static Member member;
     static Wallet wallet;
@@ -76,15 +80,15 @@ class CouponServiceTest {
     }
 
     @Test
-    @DisplayName("비관적 락을 사용하여 잔여 쿠폰이 5장이고 1000명의 유저가 동시에 쿠폰을 발급받으려는 상황")
-    void issueCouponByPessimisticLock() throws InterruptedException {
+    @DisplayName("잔여 쿠폰이 5장이고 1000명의 유저가 동시에 쿠폰을 발급받으려는 상황")
+    void issueCouponTest() throws InterruptedException {
 
         //given
         final int PARTICIPATION_PEOPLE = 1000;
 
         CountDownLatch countDownLatch = new CountDownLatch(PARTICIPATION_PEOPLE);
-        List<ParticipateWorkerByPessimisticLock> workers = Stream.generate(
-                        () -> new ParticipateWorkerByPessimisticLock(member, countDownLatch))
+        List<ParticipateWorkerByRedis> workers = Stream.generate(
+                        () -> new ParticipateWorkerByRedis(member, countDownLatch))
                 .limit(PARTICIPATION_PEOPLE)
                 .toList();
 
@@ -96,63 +100,23 @@ class CouponServiceTest {
 
         // then
         Coupon coupon = couponRepository.findById(couponId).get();
-        Assertions.assertEquals(0, coupon.getCount());
+        Long issueCouponCount = memberCouponService.getCountByCouponId(couponId);
+        Assertions.assertEquals(COUPON_COUNT, issueCouponCount);
     }
 
-    private class ParticipateWorkerByPessimisticLock implements Runnable {
+    private class ParticipateWorkerByRedis implements Runnable {
 
         private Member member;
         private CountDownLatch countDownLatch;
 
-        public ParticipateWorkerByPessimisticLock(Member member, CountDownLatch countDownLatch) {
+        public ParticipateWorkerByRedis(Member member, CountDownLatch countDownLatch) {
             this.member = member;
             this.countDownLatch = countDownLatch;
         }
 
         @Override
         public void run() {
-            couponService.issueEventCouponByPessimisticLock(couponId, member);
-            countDownLatch.countDown();
-        }
-    }
-
-    @Test
-    @DisplayName("낙관적 락을 사용하여 잔여 쿠폰이 5장이고 1000명의 유저가 동시에 쿠폰을 발급받으려는 상황")
-    void issueCouponByOptimisticLock() throws InterruptedException {
-
-        //given
-        final int PARTICIPATION_PEOPLE = 1000;
-
-        CountDownLatch countDownLatch = new CountDownLatch(PARTICIPATION_PEOPLE);
-        List<ParticipateWorkerByOptimisticLock> workers = Stream.generate(
-                        () -> new ParticipateWorkerByOptimisticLock(member, countDownLatch))
-                .limit(PARTICIPATION_PEOPLE)
-                .toList();
-
-        // when
-        List<Thread> threads = workers.stream().map(Thread::new).toList();
-
-        threads.forEach(Thread::start);
-        countDownLatch.await();
-
-        // then
-        Coupon coupon = couponRepository.findById(couponId).get();
-        Assertions.assertEquals(0, coupon.getCount());
-    }
-
-    private class ParticipateWorkerByOptimisticLock implements Runnable {
-
-        private Member member;
-        private CountDownLatch countDownLatch;
-
-        public ParticipateWorkerByOptimisticLock(Member member, CountDownLatch countDownLatch) {
-            this.member = member;
-            this.countDownLatch = countDownLatch;
-        }
-
-        @Override
-        public void run() {
-            couponService.issueEventCouponByPessimisticLock(couponId, member);
+            couponService.issueEventCoupon(couponId, member);
             countDownLatch.countDown();
         }
     }

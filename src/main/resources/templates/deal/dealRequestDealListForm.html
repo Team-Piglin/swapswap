@@ -14,7 +14,7 @@
     <div class="deal-request-List">
       <div th:each="dealDto : ${dealGetListResponseDto}" class="deal-card">
         <div class="deal-card-body">
-          <h2 th:text="${dealDto.secondUserNickname()} +'님에게 요청한 거래'" class="deal-nickname"></h2>
+          <h2 th:text="${dealDto.receiveMemberNickname()} +'님에게 요청한 거래'" class="deal-nickname"></h2>
           <h2 th:text="${dealDto.dealStatus().getName()}" class="deal-status"></h2>
           <a th:href="@{/deals/{dealId}(dealId=${dealDto.dealId})}" class="deal-button">거래 요청 보기</a>
         </div>

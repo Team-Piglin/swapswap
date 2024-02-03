@@ -26,6 +26,10 @@ spring:
     hiddenmethod:
       filter:
         enabled: true
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
 
 jwt:
   secret:
@@ -58,3 +62,4 @@ kakao:
   client:
     id: ENC(DmCqicA7Pa7EFxu5XTVtBxYl3K6fHeM1nSl090T2k+aJXj/JxcAnC1++VMpiz2ZU)
   redirect-uri: http://localhost:8080/login/kakao/callback
+

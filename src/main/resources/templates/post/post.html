@@ -47,7 +47,7 @@
           <div class="post-request-button"
                sec:authorize="isAuthenticated()"
                th:if="${postGetResponseDto.dealStatus == postGetResponseDto.dealStatus.REQUESTED} and ${!isWriter}">
-            <a th:href="@{/deals/request(secondMemberId=${postGetResponseDto.memberId},memberName=${postGetResponseDto.author})}">
+            <a th:href="@{/deals/request(receiveMemberId=${postGetResponseDto.memberId},memberName=${postGetResponseDto.author})}">
               요청하기
             </a>
           </div>
@@ -208,7 +208,7 @@
       $.ajax({
         url: '/chats/create',
         type: 'POST',
-        data: {secondMemberId: userId},
+        data: {receiveMemberId: userId},
 
         success: function (response) {
           console.log(response);

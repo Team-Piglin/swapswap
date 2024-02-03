@@ -3,245 +3,299 @@
       xmlns:layout=http://www.ultraq.net.nz/thymeleaf/layout
       layout:decorate="~{common/layout/layout}">
 <body>
-<div layout:fragment="content">
-  <input class="memberId" type="hidden" th:value="${memberId}">
-  <input class="secondMemberId" type="hidden" th:value="${secondMemberId}">
-  <!--   게시물 목록 부분 -->
-  <div class="author-name">사용자님의 스왑물품</div>
-  <div id="postContent">
-    <input type="number" id="firstExtraFee" placeholder="나의 추가 요금 입력">
-  </div>
-  <div class="author-name" th:text="${secondMemberName}+ '의 스왑물품'"></div>
-  <div id="postSecondContent">
-    <input type="number" id="secondExtraFee" placeholder="상대 추가 요금 입력">
-  </div>
-  <button id="editButton" onclick="loadPosts()">내 교환물품 수정</button>
 
-  <button id="editButton2" onclick="loadSecondPosts()">상대 교환물품 수정</button>
+<div layout:fragment="content" class="container-request">
+  <input class="memberId" type="hidden" th:value="${memberId}">
+  <input class="receiveMemberId" type="hidden" th:value="${receiveMemberId}">
+  <!--   게시물 목록 부분 -->
+  <div class="swap-section">
+  <div class="author-name">사용자님의 스왑물품</div>
+  <div id="postContent"></div>
+  <input type="text" id="requestMemberExtraFee" placeholder="나의 추가 금액 입력" oninput="validateNumberInput(this)">
+    <button id="editButton" onclick="loadPosts()">내 교환물품 수정</button>
+    <button id="resetButton" onclick="resetSelectedPosts('request')">거래물품 초기화</button>
+  </div>
+  <div class="swap-section">
+  <div class="author-name" th:text="${receiveMemberName}+ '의 스왑물품'"></div>
+  <div id="postReceiveContent"></div>
+  <input type="text" id="receiveMemberExtraFee" placeholder="상대 추가 금액 입력" oninput="validateNumberInput(this)">
+  <button id="editButton2" onclick="loadReceivePosts()">상대 교환물품 수정</button>
+    <button id="resetButton2" onclick="resetSelectedPosts('receive')">거래물품 초기화</button>
+    </div>
 
   <button id="requestDealButton" onclick="requestDeal()">거래요청하기</button>
-
+</div>
   <!--  팝업 부분 -->
   <div id="postModal" style="display: none">
   </div>
-  <script th:inline="javascript">
-    var popup = window;
 
-    function loadPosts() {
-      var memberId = document.querySelector('.memberId').value;
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          var posts = JSON.parse(xhr.responseText);
-          displayPosts(posts);
-        }
-      };
-      xhr.open("GET", "/posts/member/" + memberId, true);
-      xhr.send();
-    }
-
-    function loadSecondPosts() {
-      var secondMemberId = document.querySelector('.secondMemberId').value;
-      var xhr = new XMLHttpRequest();
-      xhr.onreadystatechange = function () {
-        if (xhr.readyState === 4 && xhr.status === 200) {
-          var posts = JSON.parse(xhr.responseText);
-          displaySecondPosts(posts);
-        }
-      };
-      xhr.open("GET", "/posts/member/" + secondMemberId, true);
-      xhr.send();
-    }
-
-    function displayPosts(posts) {
-      // 팝업 창 보이기
-      popup = window.open('', '_blank', 'width=1000,height=1000');
-      // 팝업 창에 내용 추가
-
-      popup.document.write('<html><head><title>팝업</title></head><body>');
-
-      popup.document.write('<script>');
-      popup.document.write('function addActiveClassForPostButton(target) {');
-      popup.document.write('  if(target.classList.contains(\'active\')) {');
-      popup.document.write('    target.classList.remove(\'active\');');
-      popup.document.write('  } else {');
-      popup.document.write('    target.classList.add(\'active\');'); // 이 부분에서 event.target가 아닌 target으로 수정
-      popup.document.write('  }}');
-
-      popup.document.write('function closePopup() {');
-      popup.document.write('  window.close();');
-      popup.document.write('}');
-
-      popup.document.write('function findAllActiveFirstPostButtons() {');
-      popup.document.write(
-          '  var postButtons = document.querySelectorAll(\'.post-select-button\');');
-      popup.document.write(
-          '  var activeButtons = Array.from(postButtons).filter(function(button) {');
-      popup.document.write('    return button.classList.contains(\'active\');');
-      popup.document.write('  });');
-      popup.document.write('  return activeButtons;');
-      popup.document.write('}');
-
-      popup.document.write('function sendSelectPostList() {');
-      popup.document.write('  var activeButtons = findAllActiveFirstPostButtons();');
-      popup.document.write(
-          '  var postInfoDiv = window.opener.document.getElementById(\'postContent\');');
-      popup.document.write('window.opener.firstPostIdList = [];');
-
-      popup.document.write('  if (activeButtons.length > 0) {');
-      popup.document.write('    activeButtons.forEach(function(activeButton) {');
-      popup.document.write('      var postValues = activeButton.value.split(\',\');');
-      popup.document.write('      postInfoDiv.innerHTML +=  \'<div class="request-post">\' +');
-      popup.document.write('        \'<div>게시물 제목: \' + postValues[1] + \'</div>\' +');
-      popup.document.write(
-          '        \'<div style="font-style: italic; font-size: 16px; color: #4682B4;"><img src="\' + postValues[2] + \'" alt="Post Image" style="width: 200px; height: 200px;"></div>\' +');
-      popup.document.write('      \'</div>\';');
-      popup.document.write('       window.opener.firstPostIdList.push(postValues[0]);')
-      popup.document.write('    });');
-      popup.document.write('  } else {');
-      popup.document.write('    console.log("No post is selected.");');
-      popup.document.write('  }');
-      popup.document.write('  window.close();');
-      popup.document.write('}');
-      popup.document.write('</' + 'script>');
-
-      posts.forEach(function (post) {
-        popup.document.write(
-            '<div class="post" style="display: inline-block; margin: 10px; padding: 10px; border: 1px solid #87CEEB; text-align: center; background-color: #F0F8FF;">');
-        popup.document.write(
-            '<div style="font-style: italic; font-size: 16px; color: #4682B4;">게시물 제목: '
-            + post.postTitle + '</div>');
-        popup.document.write(
-            '<img style="width: 300px; height: 300px; border: 2px solid #87CEEB;" src="'
-            + post.imageUrl + '" alt="Post Image">');
-        popup.document.write(
-            '<button class="post-select-button" value="' + post.postId + ',' + post.postTitle + ','
-            + post.imageUrl + '" onclick="addActiveClassForPostButton(this)">선택하기</button>');
-        popup.document.write('</div>');
-      });
-      popup.document.write('<button onclick="sendSelectPostList()">요청하기</button>');
-      popup.document.write('<button onclick="closePopup()">취소하기</button>');
-      popup.document.write('</body></html>');
-
-    }
-
-    function displaySecondPosts(posts) {
-      // 팝업 창 보이기
-      popup = window.open('', '_blank', 'width=1000,height=1000');
-      // 팝업 창에 내용 추가
-
-      popup.document.write('<html><head><title>팝업</title></head><body>');
-
-      popup.document.write('<script>');
-      popup.document.write('function addActiveClassForSecondPostButton(target) {');
-      popup.document.write('  if(target.classList.contains(\'active\')) {');
-      popup.document.write('    target.classList.remove(\'active\');');
-      popup.document.write('  } else {');
-      popup.document.write('    target.classList.add(\'active\');'); // 이 부분에서 event.target가 아닌 target으로 수정
-      popup.document.write('  }}');
-
-      popup.document.write('function closePopup() {');
-      popup.document.write('  window.close();');
-      popup.document.write('}');
-
-      popup.document.write('function findAllActiveSecondPostButtons() {');
-      popup.document.write(
-          '  var postSecondButtons = document.querySelectorAll(\'.post-select-second-button\');');
-      popup.document.write(
-          '  var activeSecondButtons = Array.from(postSecondButtons).filter(function(button) {');
-      popup.document.write('    return button.classList.contains(\'active\');');
-      popup.document.write('  });');
-      popup.document.write('  return activeSecondButtons;');
-      popup.document.write('}');
-
-      popup.document.write('function sendSelectSecondPostList() {');
-      popup.document.write('  var activeSecondButtons = findAllActiveSecondPostButtons();');
-      popup.document.write(
-          '  var postSecondInfoDiv = window.opener.document.getElementById(\'postSecondContent\');');
-      popup.document.write('window.opener.secondPostIdList = [];');
-
-      popup.document.write('  if (activeSecondButtons.length > 0) {');
-      popup.document.write('    activeSecondButtons.forEach(function(activeSecondButton) {');
-      popup.document.write('      var secondPostValues = activeSecondButton.value.split(\',\');');
-      popup.document.write(
-          '      postSecondInfoDiv.innerHTML +=  \'<div class="request-second-post">\' +');
-      /* popup.document.write(
-           '        \'<div class ="test post" typeof="hidden" > \' + secondPostValues[0] + \'</div>\' +');*/
-      popup.document.write('        \'<div> 게시물 제목 : \' + secondPostValues[1] + \'</div>\' +');
-      popup.document.write(
-          '        \'<div style="font-style: italic; font-size: 16px; color: #4682B4;"><img src="\' + secondPostValues[2] + \'" alt="Post Image" style="width: 200px; height: 200px;"></div>\' +');
-      popup.document.write('      \'</div>\';');
-      popup.document.write('       window.opener.secondPostIdList.push(secondPostValues[0]);')
-
-      popup.document.write('    });');
-      popup.document.write('  } else {');
-      popup.document.write('    console.log("No post is selected.");');
-      popup.document.write('  }');
-      popup.document.write('  window.close();');
-      popup.document.write('}');
-
-      popup.document.write('</' + 'script>');
-
-      posts.forEach(function (post) {
-        popup.document.write(
-            '<div class="post" style="display: inline-block; margin: 10px; padding: 10px; border: 1px solid #87CEEB; text-align: center; background-color: #F0F8FF;">');
-        popup.document.write(
-            '<div style="font-style: italic; font-size: 16px; color: #4682B4;">게시물 제목: '
-            + post.postTitle + '</div>');
-        popup.document.write(
-            '<img style="width: 300px; height: 300px; border: 2px solid #87CEEB;" src="'
-            + post.imageUrl + '" alt="Post Image">');
-        popup.document.write(
-            '<button class="post-select-second-button" value="' + post.postId + ',' + post.postTitle
-            + ','
-            + post.imageUrl + '" onclick="addActiveClassForSecondPostButton(this)">선택하기</button>');
-        popup.document.write('</div>');
-      });
-      popup.document.write('<button onclick="sendSelectSecondPostList()">요청하기</button>');
-      popup.document.write('<button onclick="closePopup()">취소하기</button>');
-      popup.document.write('</body></html>');
-
-    }
-
-    function requestDeal() {
-      var firstExtraFeeInput = document.getElementById('firstExtraFee');
-      var secondExtraFeeInput = document.getElementById('secondExtraFee');
-
-      // 입력값을 변수에 할당
-      var firstExtraFee = firstExtraFeeInput.value;
-      var secondExtraFee = secondExtraFeeInput.value;
-      console.log(firstPostIdList);
-      console.log(secondPostIdList);
-      var secondMemberId = document.querySelector('.secondMemberId').value;
-      if (secondPostIdList.length > 0 && firstPostIdList.length > 0) {
-        var postInfo = {
-          firstExtraFee: firstExtraFee,
-          secondExtraFee: secondExtraFee,
-          secondPostIdList: secondPostIdList,
-          firstPostIdList: firstPostIdList,
-          secondMemberId : secondMemberId
-        };
-
-        // AJAX를 사용하여 서버로 데이터 전송
-        var xhr = new XMLHttpRequest();
-        xhr.open("POST", "/deals", true);
-        xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
-        xhr.onreadystatechange = function () {
-          if (xhr.readyState === 4) {
-            if (xhr.status === 200) {
-              var response = JSON.parse(xhr.responseText); // JSON 형식의 응답을 파싱
-              location.href = "/deals/" + response; // dealId를 URL에 추가
-            } else {
-              console.error("Error sending data to server");
-            }
-          }
-        };
-        xhr.send(JSON.stringify(postInfo));
-      } else {
-        console.log("No post is selected.");
-      }
-    }
-  </script>
 </div>
 </body>
+<script layout:fragment="script">
+  var popup = window;
+  var requestPostIdList =[];
+  var receivePostIdList=[];
+  var selectedRequestPostIds = new Set();
+  var selectedReceivePostIds = new Set();
+  function loadPosts() {
+    var memberId = document.querySelector('.memberId').value;
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        var posts = JSON.parse(xhr.responseText);
+        displayPosts(posts);
+      }
+    };
+    xhr.open("GET", "/posts/member/" + memberId, true);
+    xhr.send();
+  }
+
+  function loadReceivePosts() {
+    var receiveMemberId = document.querySelector('.receiveMemberId').value;
+    var xhr = new XMLHttpRequest();
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4 && xhr.status === 200) {
+        var posts = JSON.parse(xhr.responseText);
+        displayReceivePosts(posts);
+      }
+    };
+    xhr.open("GET", "/posts/member/" + receiveMemberId, true);
+    xhr.send();
+  }
+
+  function resetSelectedPosts(type) {
+    if (type === 'request') {
+      // 첫 번째 회원의 선택된 게시물 초기화
+      selectedRequestPostIds.clear();
+      document.getElementById('postContent').innerHTML = ''; // 표시 영역 지우기
+    } else if (type === 'receive') {
+      // 두 번째 회원의 선택된 게시물 초기화
+      selectedReceivePostIds.clear();
+      document.getElementById('postReceiveContent').innerHTML = ''; // 표시 영역 지우기
+    }
+  }
+
+  function displayPosts(posts) {
+    // 팝업 창 보이기
+    popup = window.open('', '_blank', 'width=1000,height=1000');
+    // 팝업 창에 내용 추가
+
+    popup.document.write('<html><head><title>팝업</title>');
+    popup.document.write('<style>');
+    popup.document.write('.post-select-button.active,');
+    popup.document.write('.post-select-receive-button.active {');
+    popup.document.write('  background-color: #4CAF50;');
+    popup.document.write('  color: white;');
+    popup.document.write('  border: 2px solid #4CAF50;');
+    popup.document.write('}');
+    popup.document.write('</style>');
+    popup.document.write('</head><body>');
+    popup.document.write('<script>');
+    popup.document.write('function addActiveClassForPostButton(target, postId, isReceive) {');
+    popup.document.write('  if(target.classList.contains(\'active\')) {');
+    popup.document.write('    target.classList.remove(\'active\');');
+    popup.document.write('  } else {');
+    popup.document.write('    target.classList.add(\'active\');');
+    popup.document.write('  }}');
+
+    popup.document.write('function closePopup() {');
+    popup.document.write('  window.close();');
+    popup.document.write('}');
+
+    popup.document.write('function findAllActiveRequestPostButtons() {');
+    popup.document.write(
+        '  var postButtons = document.querySelectorAll(\'.post-select-button\');');
+    popup.document.write(
+        '  var activeButtons = Array.from(postButtons).filter(function(button) {');
+    popup.document.write('    return button.classList.contains(\'active\');');
+    popup.document.write('  });');
+    popup.document.write('  return activeButtons;');
+    popup.document.write('}');
+
+    popup.document.write('function sendSelectPostList() {');
+    popup.document.write('  var activeButtons = findAllActiveRequestPostButtons();');
+    popup.document.write(
+        '  var postInfoDiv = window.opener.document.getElementById(\'postContent\');');
+    popup.document.write('window.opener.requestPostIdList = [];');
+    popup.document.write('    activeButtons.forEach(function(activeButton) {');
+    popup.document.write('      var postValues = activeButton.value.split(\',\');');
+    popup.document.write('      postInfoDiv.innerHTML +=  \'<div class="request-post">\' +');
+    popup.document.write('        \'<div>게시물 제목: \' + postValues[1] + \'</div>\' +');
+    popup.document.write(
+        '        \'<div style="font-style: italic; font-size: 16px; color: #4682B4;"><img src="\' + postValues[2] + \'" alt="Post Image" style="width: 200px; height: 200px;"></div>\' +');
+    popup.document.write('      \'</div>\';');
+    popup.document.write('       window.opener.requestPostIdList.push(postValues[0]);')
+    popup.document.write('    });');
+    popup.document.write('  window.close();');
+    popup.document.write('}');
+    popup.document.write('</' + 'script>');
+
+    posts.forEach(function (post) {
+      popup.document.write(
+          '<div class="post" style="display: inline-block; margin: 10px; padding: 10px; border: 1px solid #87CEEB; text-align: center; background-color: #F0F8FF;">');
+      popup.document.write(
+          '<div style="font-style: italic; font-size: 16px; color: #4682B4;">게시물 제목: '
+          + post.postTitle + '</div>');
+      popup.document.write(
+          '<img style="width: 300px; height: 300px; border: 2px solid #87CEEB;" src="'
+          + post.imageUrl + '" alt="Post Image">');
+      popup.document.write(
+          '<button class="post-select-button" value="' + post.postId + ',' + post.postTitle + ','
+          + post.imageUrl + '" onclick="addActiveClassForPostButton(this)">선택하기</button>');
+      popup.document.write('</div>');
+    });
+    popup.document.write('<button onclick="sendSelectPostList()">요청하기</button>');
+    popup.document.write('<button onclick="closePopup()">취소하기</button>');
+    popup.document.write('</body></html>');
+  }
+
+  function displayReceivePosts(posts) {
+    // 팝업 창 보이기
+    popup = window.open('', '_blank', 'width=1000,height=1000');
+    // 팝업 창에 내용 추가
+
+    popup.document.write('<html><head><title>팝업</title>');
+    popup.document.write('<style>');
+    popup.document.write('.post-select-button.active,');
+    popup.document.write('.post-select-receive-button.active {');
+    popup.document.write('  background-color: #4CAF50;');
+    popup.document.write('  color: white;');
+    popup.document.write('  border: 2px solid #4CAF50;');
+    popup.document.write('}');
+    popup.document.write('</style>');
+    popup.document.write('</head><body>');
+    popup.document.write('<script>');
+    popup.document.write('function addActiveClassForReceivePostButton(target) {');
+    popup.document.write('  if(target.classList.contains(\'active\')) {');
+    popup.document.write('    target.classList.remove(\'active\');');
+    popup.document.write('  } else {');
+    popup.document.write('    target.classList.add(\'active\');');
+    popup.document.write('  }}');
+
+    popup.document.write('function closePopup() {');
+    popup.document.write('  window.close();');
+    popup.document.write('}');
+
+    popup.document.write('function findAllActiveReceivePostButtons() {');
+    popup.document.write(
+        '  var postReceiveButtons = document.querySelectorAll(\'.post-select-receive-button\');');
+    popup.document.write(
+        '  var activeReceiveButtons = Array.from(postReceiveButtons).filter(function(button) {');
+    popup.document.write('    return button.classList.contains(\'active\');');
+    popup.document.write('  });');
+    popup.document.write('  return activeReceiveButtons;');
+    popup.document.write('}');
+
+    popup.document.write('function sendSelectReceivePostList() {');
+    popup.document.write('  var activeReceiveButtons = findAllActiveReceivePostButtons();');
+    popup.document.write(
+        '  var postReceiveInfoDiv = window.opener.document.getElementById(\'postReceiveContent\');');
+    popup.document.write('window.opener.receivePostIdList = [];');
+    popup.document.write('    activeReceiveButtons.forEach(function(activeReceiveButton) {');
+    popup.document.write('      var receivePostValues = activeReceiveButton.value.split(\',\');');
+    popup.document.write(
+        '      postReceiveInfoDiv.innerHTML +=  \'<div class="request-receive-post">\' +');
+    /* popup.document.write(
+         '        \'<div class ="test post" typeof="hidden" > \' + receivePostValues[0] + \'</div>\' +');*/
+    popup.document.write('        \'<div> 게시물 제목 : \' + receivePostValues[1] + \'</div>\' +');
+    popup.document.write(
+        '        \'<div style="font-style: italic; font-size: 16px; color: #4682B4;"><img src="\' + receivePostValues[2] + \'" alt="Post Image" style="width: 200px; height: 200px;"></div>\' +');
+    popup.document.write('      \'</div>\';');
+    popup.document.write('       window.opener.receivePostIdList.push(receivePostValues[0]);')
+    popup.document.write('    });');
+    popup.document.write('  window.close();');
+    popup.document.write('}');
+    popup.document.write('</' + 'script>');
+
+    posts.forEach(function (post) {
+      popup.document.write(
+          '<div class="post" style="display: inline-block; margin: 10px; padding: 10px; border: 1px solid #87CEEB; text-align: center; background-color: #F0F8FF;">');
+      popup.document.write(
+          '<div style="font-style: italic; font-size: 16px; color: #4682B4;">게시물 제목: '
+          + post.postTitle + '</div>');
+      popup.document.write(
+          '<img style="width: 300px; height: 300px; border: 2px solid #87CEEB;" src="'
+          + post.imageUrl + '" alt="Post Image">');
+      popup.document.write(
+          '<button class="post-select-receive-button" value="' + post.postId + ',' + post.postTitle
+          + ','
+          + post.imageUrl + '" onclick="addActiveClassForReceivePostButton(this)">선택하기</button>');
+      popup.document.write('</div>');
+    });
+    popup.document.write('<button onclick="sendSelectReceivePostList()">요청하기</button>');
+    popup.document.write('<button onclick="closePopup()">취소하기</button>');
+    popup.document.write('</body></html>');
+
+  }
+
+  var isBackspace = false;
+  function validateNumberInput(input) {
+    var value = input.value;
+
+    // 백스페이스 키를 사용하여 값이 지워진 경우에만 알람 무시
+    if (isBackspace) {
+      isBackspace = false;
+      return;
+    }
+
+    // 숫자가 아닌 경우 경고를 주고 입력값을 비움
+    if (!isNumeric(value)) {
+      alert('0을 제외한 자연수만 입력할 수 있습니다.');
+      input.value = '';
+    }
+  }
+
+  function isNumeric(value) {
+    return /^-?\d*\.?\d+$/.test(value);
+  }
+
+  document.addEventListener('keydown', function (event) {
+    // 백스페이스 키를 눌렀을 때 플래그를 설정
+    if (event.key === 'Backspace') {
+      isBackspace = true;
+    }
+  });
+
+  function requestDeal() {
+    var requestMemberExtraFeeInput = document.getElementById('requestMemberExtraFee');
+    var receiveMemberExtraFeeInput = document.getElementById('receiveMemberExtraFee');
+
+    // 입력값을 변수에 할당
+    var requestMemberExtraFee = requestMemberExtraFeeInput.value;
+    var receiveMemberExtraFee = receiveMemberExtraFeeInput.value;
+
+    if (requestPostIdList.length <= 0 && receivePostIdList <= 0) {
+     new swal({
+        title : "오류",
+        html: "두명의 사용자 중 적어도<br> 한명의 사용자는 물건을 등록해야 합니다.",
+        icon: "error"
+      });
+      return;
+    }
+
+    var receiveMemberId = document.querySelector('.receiveMemberId').value;
+    var postInfo = {
+      requestMemberExtraFee: requestMemberExtraFee,
+      receiveMemberExtraFee: receiveMemberExtraFee,
+      requestPostIdList: requestPostIdList,
+      receivePostIdList: receivePostIdList,
+      receiveMemberId : receiveMemberId
+    }
+    // AJAX를 사용하여 서버로 데이터 전송
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", "/deals", true);
+    xhr.setRequestHeader("Content-Type", "application/json;charset=UTF-8");
+    xhr.onreadystatechange = function () {
+      if (xhr.readyState === 4) {
+        if (xhr.status === 200) {
+          var response = JSON.parse(xhr.responseText); // JSON 형식의 응답을 파싱
+          location.href = "/deals/" + response; // dealId를 URL에 추가
+        } else {
+          console.error("Error sending data to server");
+        }
+      }
+    };
+    xhr.send(JSON.stringify(postInfo));
+  }
+</script>
 </html>

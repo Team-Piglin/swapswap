@@ -33,7 +33,6 @@ public class NotificationServiceImpl implements NotificationService {
 
     @Override
     public SseEmitter subscribe(Long memberId, String lastEventId) {
-        log.info("알림 구독 시작");
 
         String emitterId = memberId + "_" + System.currentTimeMillis();
 

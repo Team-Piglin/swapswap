@@ -8,12 +8,13 @@
   <div class="deal-list">
     <div class="author-dealList-name" th:text="${memberNickname}+'님이 받은 스왑 요청 목록'">
   </div>
+    <a th:href="@{/deals/request/list}" class="deal-response-button">요청 한 목록 보러 가기</a>
   </div>
   <div class="deal-content-container">
     <div class="deal-response-List">
       <div th:each="dealDto : ${dealGetListResponseDto}" class="deal-response-card">
         <div class="deal-response-card-body">
-          <h2 th:text="${dealDto.secondUserNickname()} +'님이 요청한 거래'" class="deal-nickname"></h2>
+          <h2 th:text="${dealDto.requestMemberNickname()} +'님이 요청한 거래'" class="deal-nickname"></h2>
           <h2 th:text="${dealDto.dealStatus().getName()}" class="deal-status"></h2>
           <a th:href="@{/deals/{dealId}(dealId=${dealDto.dealId})}" class="deal-responseList-button">거래 요청 보기</a>
         </div>

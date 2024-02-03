@@ -5,6 +5,20 @@
   font-style: normal;
 }
 
+.swal-title {
+  font-size: 18px;
+}
+
+.swal-text {
+  font-size: 25px;
+  text-align: center;
+}
+
+.swal-button {
+  font-size: 16px;
+  background-color: #00AADC;
+}
+
 body {
   font-family: 'S-CoreDream-3Light';
 }
@@ -315,6 +329,7 @@ img {
   color: white;
   font-size: 1em;
   font-weight: bold;
+  text-align: center;
 }
 
 .post-deal-status.dealing {
@@ -1170,7 +1185,7 @@ li {
 }
 
 #postContent,
-#postSecondContent {
+#postReceiveContent {
   margin-bottom: 20px;
 }
 
@@ -1183,6 +1198,8 @@ input[type="number"] {
 
 #editButton,
 #editButton2,
+#resetButton,
+#resetButton2,
 #requestDealButton {
   background-color: #4caf50;
   color: #fff;
@@ -1193,6 +1210,8 @@ input[type="number"] {
 
 #editButton:hover,
 #editButton2:hover,
+#resetButton:hover,
+#resetButton2:hover,
 #requestDealButton:hover {
   background-color: #45a049;
 }
@@ -1227,7 +1246,7 @@ input[type="number"] {
 }
 
 .request-post,
-.request-second-post {
+.request-receive-post {
   display: inline-block;
   margin: 10px;
   padding: 10px;
@@ -1237,7 +1256,7 @@ input[type="number"] {
 }
 
 .request-post img,
-.request-second-post img {
+.request-receive-post img {
   width: 200px;
   height: 200px;
   border: 2px solid #87CEEB;
@@ -1245,7 +1264,7 @@ input[type="number"] {
 }
 
 .request-post button,
-.request-second-post button {
+.request-receive-post button {
   background-color: #4caf50;
   color: #fff;
   padding: 8px;
@@ -1255,12 +1274,12 @@ input[type="number"] {
 }
 
 .request-post button:hover,
-.request-second-post button:hover {
+.request-receive-post button:hover {
   background-color: #45a049;
 }
 
-#firstExtraFee,
-#secondExtraFee {
+#requestMemberExtraFee,
+#receiveMemberExtraFee {
   width: 150px;
   height: 20px;
   font-size: 12px;
@@ -1802,8 +1821,8 @@ input[type="number"] {
 
 
 /* Buttons for editing, positioned at the top-right corner */
-.deal-detail-first-user-edit-button,
-.deal-detail-second-user-edit-button {
+.deal-detail-request-user-edit-button,
+.deal-detail-receive-user-edit-button {
   position: absolute;
   top: 10px; /* 컨테이너 상단에서의 위치 */
   right: 25px; /* 컨테이너 오른쪽에서의 위치 */
@@ -1815,15 +1834,15 @@ input[type="number"] {
   font-size: 0.9rem;
 }
 
-.deal-detail-first-user-edit-button a,
-.deal-detail-second-user-edit-button a {
+.deal-detail-request-user-edit-button a,
+.deal-detail-receive-user-edit-button a {
   color: white;
   text-decoration: none;
 }
 
 
-.deal-detail-first-user-edit-button:hover,
-.deal-detail-second-user-edit-button:hover {
+.deal-detail-request-user-edit-button:hover,
+.deal-detail-receive-user-edit-button:hover {
   background-color: #1b6c2f;
 }
 
@@ -1848,8 +1867,8 @@ input[type="number"] {
     margin: 5px 0; /* Adjust margin for vertical layout */
   }
 
-  .deal-first-user-edit-button,
-  .deal-second-user-edit-button {
+  .deal-request-user-edit-button,
+  .deal-receive-user-edit-button {
     top: initial;
     bottom: 20px;
   }
@@ -1894,7 +1913,6 @@ input[type="number"] {
   position: absolute;
   bottom: 10px; /* 아래쪽에서 10px 오프셋 */
   right: 25px; /* 오른쪽 정렬 */
-  width: 100%; /* 전체 너비 */
 }
 
 @media screen and (max-width: 768px) {
@@ -1904,8 +1922,8 @@ input[type="number"] {
   }
 
 
-.deal-detail-first-user-edit-button,
-.deal-detail-second-user-edit-button {
+.deal-detail-request-user-edit-button,
+.deal-detail-receive-user-edit-button {
   position: static; /* 작은 화면에서는 정적 위치 사용 */
   margin: 10px 0; /* 상단 및 하단 여백 조정 */
 }
@@ -1946,11 +1964,6 @@ input[type="number"] {
 .deal-history-completed{
   width: 210px;
   margin-right: 38px;
-}
-
-.deal-history-status {
-  width: 100px;
-  margin-right: 190px;
 }
 
 .deal-history-detail {
@@ -2111,6 +2124,157 @@ input[type="number"] {
   background: #EBEBEB;
   border-radius: 20px;
 }
+.coupon-card {
+  background-color: #c7f1ff;
+}
+
+.coupon-card:hover {
+  background-color: #00c6ff;
+}
+
+.select-coupon {
+  background-color: #00c6ff;
+}
+
+.coupon-use-body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+  flex-wrap: nowrap;
+}
+
+.coupon-btn {
+  margin: 60px;
+  background-color: #28a745;
+  color: white;
+  width: 200px;
+  height: 50px;
+  font-size: 20px;
+  border-radius: 10px;
+}
+.coupon-btn:hover {
+  background-color: #1b6c2f;
+}
+/** 결제창 **/
+
+.liquidate-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+}
+
+.liquidate-content a {
+  margin-top: 10px; /* 링크와 위의 간격 조절 */
+}
+
+.liquidate-content div {
+  font-size: 18px; /* 글자 크기 조절 */
+  padding: 10px; /* 테두리 내부 간격 설정 */
+  margin: 10px 0; /* 요소간의 간격을 위아래로 설정 */
+  display: flex;
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  width: 50%;
+}
+
+.deal-acceptance-button-liquidate {
+  padding: 10px 15px; /* 버튼 내부 패딩 */
+  margin-left: auto;
+  margin-bottom: 10px;
+  margin-right: 10px; /* 버튼 간 여백 */
+  border: none;
+  border-radius: 5px;
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
+
+.deal-acceptance-button-liquidate:hover {
+  background-color: #218838; /* 호버 시 배경색 변경 */
+}
+
+.coupon-button {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 5px;
+  background-color: #28a745;
+  color: white;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.3s;
+}
+
+.coupon-button:hover {
+  background-color: #1b6c2f;
+}
+
+.coupon-content {
+  margin-left: 20px;
+}
+
+.swap-pay-title-liquidate {
+  background-color: #45baff;
+}
+
+.deal-update-post-container {
+  display: flex;
+}
+
+.post-item {
+  position: relative;
+  width: calc(33.333% - 40px);
+  margin: 20px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+  border-radius: 4px;
+  overflow: hidden;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+}
+
+.deal-update-post-container img {
+  height: auto;
+}
+
+.post-item-title {
+  font-size: 20px;
+  text-align: center;
+}
+
+.post-select-button {
+  font-size: 16px; /* 글꼴 크기 */
+  color: white; /* 글꼴 색상 */
+  background-color: #4CAF50; /* 배경색 */
+  border: none; /* 테두리 없음 */
+  padding: 10px 20px; /* 상하, 좌우 패딩 */
+  text-align: center; /* 텍스트 중앙 정렬 */
+  text-decoration: none; /* 텍스트 밑줄 없음 */
+  display: inline-block; /* 인라인 블록 요소로 표시 */
+  margin: 4px 2px; /* 마진 */
+  cursor: pointer; /* 커서 스타일 */
+  border-radius: 5px; /* 테두리 둥글게 */
+  transition: background-color 0.3s, transform 0.3s; /* 배경색과 변형에 대한 전환 효과 */
+}
+
+.post-select-button:hover, .post-select-button.active:hover {
+  background-color: #397afc; /* 호버 시 또는 active + 호버 시 배경색 */
+  color: #FFFFFF; /* 호버 시 또는 active + 호버 시 글꼴 색상 */
+}
+
+.post-select-button.active {
+  background-color: #397afc; /* 호버 시 배경색 */
+  color: #FFF; /* active 상태일 때의 글꼴 색상 */
+  border: 1px solid #31708F; /* active 상태일 때의 테두리 */
+  transform: scale(1.1); /* active 상태일 때 약간 확대 */
+}
+
 
 #message:focus {
   outline: none;
@@ -2247,4 +2411,58 @@ input[type="number"] {
   width: 23px;
   margin-top: 6px;
   margin-right: -11px;
+}
+
+/*.container {*/
+/*  text-align: center;*/
+/*}*/
+.container-request {
+  max-width: 900px;
+  margin: 20px auto;
+  background-color: #fff;
+  padding: 20px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+}
+
+.swap-section {
+  border: 2px solid #87CEEB;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin: 20px;
+  display: inline-block; /* swap-section이 옆으로 나열되도록 display 속성 추가 */
+  width: 60%;
+}
+
+.post-select-button.active,
+.post-select-receive-button.active {
+  background-color: #4CAF50; /* Green */
+  color: white;
+}
+
+.post-select-button.active,
+.post-select-receive-button.active {
+  background-color: #4CAF50; /* 선택된 버튼의 배경색을 변경할 수 있습니다. */
+  color: white; /* 선택된 버튼의 글자색을 변경할 수 있습니다. */
+  border: 2px solid #4CAF50; /* 선택된 버튼의 테두리를 변경할 수 있습니다. */
+}
+
+.status-요청-중 {
+  width: 100px;
+  margin-right: 150px;
+  color: red;
+}
+
+/* 거래 진행 중일 때의 스타일 */
+.status-거래-진행-중 {
+  width: 100px;
+  margin-right: 150px;
+  color: #007bff;
+}
+
+/* 거래 완료일 때의 스타일 */
+.status-거래-완료 {
+  width: 100px;
+  margin-right: 150px;
+  color: #333333;
 }

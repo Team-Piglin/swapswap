@@ -95,7 +95,7 @@ public class MemberController {
     @GetMapping("/unregister")
     public String unregister(@AuthMember Member member, Model model) {
 
-        model.addAttribute("currentSwapMoney", memberService.getMySwapMoney(member.getId()));
+        model.addAttribute("currentSwapMoney", memberService.getMySwapMoney(member));
 
         return "member/unregister";
     }
@@ -134,8 +134,7 @@ public class MemberController {
             Model model
     ) {
 
-        Long mySwapMoney = memberService.getMySwapMoney(member.getId());
-
+        Long mySwapMoney = memberService.getMySwapMoney(member);
         model.addAttribute("mySwapMoney", mySwapMoney);
 
         return "member/mySwapMoney";
