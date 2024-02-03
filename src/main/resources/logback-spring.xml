@@ -3,8 +3,8 @@
   <conversionRule conversionWord="clr"
     converterClass="org.springframework.boot.logging.logback.ColorConverter"/>
 
-  <include resource="./log/appender/logback-local-console-appender.xml" />
-  <include resource="./log/appender/logback-prod-console-appender.xml" />
+  <include resource="log/appender/logback-local-console-appender.xml" />
+  <include resource="log/appender/logback-prod-console-appender.xml" />
 
   <springProfile name="prod">
     <root level="info">
