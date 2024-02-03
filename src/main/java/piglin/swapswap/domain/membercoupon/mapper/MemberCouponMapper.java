@@ -6,17 +6,16 @@ import piglin.swapswap.domain.member.entity.Member;
 import piglin.swapswap.domain.membercoupon.dto.response.MyCouponGetResponseDto;
 import piglin.swapswap.domain.membercoupon.entity.MemberCoupon;
 
+import static java.util.stream.Collectors.toList;
+
 public class MemberCouponMapper {
 
     public static MemberCoupon createMemberCoupon(Member member, Coupon coupon) {
 
         return MemberCoupon.builder()
-                .name(coupon.getName())
-                .couponType(coupon.getCouponType())
-                .discountPercentage(coupon.getDiscountPercentage())
-                .expiredTime(coupon.getExpiredTime())
+                .coupon(coupon)
                 .member(member)
-                .isDeleted(false)
+                .isUsed(false)
                 .build();
     }
 
@@ -24,12 +23,15 @@ public class MemberCouponMapper {
             List<MemberCoupon> memberCouponList) {
 
         return memberCouponList.stream().map(memberCoupon ->
-                MyCouponGetResponseDto.builder()
-                .couponName(memberCoupon.getName())
-                .couponType(memberCoupon.getCouponType())
-                .discountPercentage(memberCoupon.getDiscountPercentage())
-                .expiredTime(memberCoupon.getExpiredTime())
-                .build()).toList();
+        {
+            Coupon coupon = memberCoupon.getCoupon();
+            return MyCouponGetResponseDto.builder()
+                    .couponId(memberCoupon.getId())
+                    .couponName(coupon.getName())
+                    .couponType(coupon.getCouponType())
+                    .discountPercentage(coupon.getDiscountPercentage())
+                    .expiredTime(coupon.getExpiredTime())
+                    .build();
+        }).toList();
     }
-
 }

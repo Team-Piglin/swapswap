@@ -7,11 +7,8 @@ import piglin.swapswap.domain.deal.constant.DealStatus;
 @Builder
 public record DealHistoryResponseDto(
         Long id,
-
         DealStatus dealStatus,
-
         LocalDateTime createdTime,
-
         LocalDateTime completedDealTime
 ) {
 

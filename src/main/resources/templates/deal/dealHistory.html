@@ -24,7 +24,7 @@
         <div class="deal-card2-body">
          <div class="deal-history-created" ><h2 class="deal-createdTime" th:text="${#temporals.format(dealHistoryDto.createdTime(), 'yyyy-MM-dd HH:mm')}"></h2></div>
           <div class="deal-history-completed" ><h2 th:if="${dealHistoryDto.completedDealTime != null}" th:text="${#temporals.format(dealHistoryDto.completedDealTime, 'yyyy-MM-dd HH:mm')}"></h2></div>
-          <div class="deal-history-status"><h2 th:text="${dealHistoryDto.dealStatus().getName()}"></h2></div>
+          <div class="deal-history-status"  th:class="${'status-' + dealHistoryDto.dealStatus().getName().toLowerCase().replace(' ', '-')}"><h2 th:text="${dealHistoryDto.dealStatus().getName()}"></h2></div>
           <div class="deal-history-detail"><a th:href="@{/deals/{dealId}(dealId=${dealHistoryDto.id()})}" class="deal-history-button">거래 상세 보기</a></div>
         </div>
       </div>

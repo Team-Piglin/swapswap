@@ -1,13 +1,13 @@
 package piglin.swapswap.domain.deal.dto.response;
 
+import lombok.Builder;
 import piglin.swapswap.domain.deal.constant.DealStatus;
 
-
-public record DealGetResponseDto(
+@Builder
+public record DealGetReceiveDto(
         Long dealId,
-        String secondUserNickname,
+        String requestMemberNickname,
         DealStatus dealStatus
-
 ) {
 
 }

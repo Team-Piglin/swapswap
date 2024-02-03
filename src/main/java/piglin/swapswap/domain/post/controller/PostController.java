@@ -60,7 +60,7 @@ public class PostController {
             Model model
     ) {
 
-        PostGetResponseDto responseDto = postService.getPost(postId, member);
+        PostGetResponseDto responseDto = postService.getPostWithFavorite(postId, member);
 
         model.addAttribute("postGetResponseDto", responseDto);
         model.addAttribute("postId", postId);

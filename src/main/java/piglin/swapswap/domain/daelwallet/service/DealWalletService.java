@@ -5,17 +5,13 @@ import piglin.swapswap.domain.member.entity.Member;
 
 public interface DealWalletService {
 
+     void createDealWallet(Deal deal, Member member, Long totalFee);
 
-
-     void createDealWallet(Deal deal, Member member, Long swapMoney);
-
-     void updateDealWallet(Deal deal, Member member, Long swapMoney);
-
-     void withdrawMemberSwapMoneyAtUpdate(Deal deal, Member member);
+     void updateDealWallet(Deal deal, Member member, Long totalFee);
 
      void withdrawMemberSwapMoneyAtComplete(Deal deal);
 
-     void withdrawMemberSwapMoneyAtDealUpdate(Deal deal);
+     void rollbackTemporarySwapMoney(Deal deal);
 
-     Boolean existsDealWallet(Long dealId);
+     boolean existDealWalletByDealId(Long dealId);
 }
