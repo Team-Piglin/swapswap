@@ -10,6 +10,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import piglin.swapswap.TCIntegrationTest;
 import org.springframework.data.redis.core.RedisTemplate;
 import piglin.swapswap.domain.coupon.constant.CouponType;
 import piglin.swapswap.domain.coupon.dto.request.CouponCreateRequestDto;
@@ -23,7 +24,7 @@ import piglin.swapswap.domain.wallet.entity.Wallet;
 import piglin.swapswap.domain.wallet.repository.WalletRepository;
 
 @SpringBootTest
-class CouponServiceTest {
+class CouponServiceTest extends TCIntegrationTest {
 
     @Autowired
     CouponService couponService;

@@ -76,6 +76,12 @@ dependencies {
     testImplementation "org.springframework.boot:spring-boot-starter-test"
     testImplementation "org.mockito:mockito-core"
 
+    // Test Containers
+    testImplementation "org.testcontainers:testcontainers:1.19.0"
+    testImplementation 'org.testcontainers:mysql:1.16.0'
+    testImplementation "com.redis.testcontainers:testcontainers-redis-junit:1.6.4"
+    testImplementation 'org.testcontainers:jdbc:1.16.0'
+
     // web socket
     implementation 'org.springframework.boot:spring-boot-starter-websocket'
 

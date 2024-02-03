@@ -22,6 +22,11 @@ spring:
       filter:
         enabled: true
 
+  data:
+    redis:
+      host: localhost
+      port: 6379
+
 jwt:
   secret:
     key: ENC(vvNeDy5afcRKYPy6Pdy2uIGfROZ6ZVGaYEBgaBPs4cttxYsNvS8PD5Xv9DNMC8tU/gxMtW2wHf4M7igHTjZBLUazfi8m3OyxWbDjXIyup4HAfvN9YrMmnAVTN1fAMKsC)
