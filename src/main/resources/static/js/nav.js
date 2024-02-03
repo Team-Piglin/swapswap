@@ -112,7 +112,7 @@ document.addEventListener('DOMContentLoaded', function () {
 function csCenter() {
 
   Swal.fire({
-    title : '서비스 준비중입니다',
+    title: '서비스 준비중입니다',
     confirmButtonColor: '#00AADC'
   })
 }
@@ -124,17 +124,6 @@ document.addEventListener('DOMContentLoaded', function () {
   const closeBtn = modal.querySelector('.close');
   const deleteAllBtn = modal.querySelector('#deleteAllNotificationsBtn');
 
-  if (getToken()) {
-    subscribeToNotifications();
-    getCountOfUnreadNotifications();
-  }
-
-  link.addEventListener('click', function (event) {
-    event.preventDefault();
-    modal.style.display = 'block';
-    fetchAndDisplayNotifications();
-  });
-
   closeBtn.addEventListener('click', function () {
     modal.style.display = 'none';
   });
@@ -144,7 +133,18 @@ document.addEventListener('DOMContentLoaded', function () {
       modal.style.display = 'none';
     }
   });
+  if (getToken()) {
 
+    link.addEventListener('click', function (event) {
+      event.preventDefault();
+      modal.style.display = 'block';
+      fetchNotifications();
+      displayNotifications();
+    });
+
+    subscribeToNotifications();
+    getCountOfUnreadNotifications();
+  }
   deleteAllBtn.addEventListener('click', function () {
     deleteAllNotifications();
   });
@@ -161,10 +161,6 @@ function subscribeToNotifications() {
   eventSource.onmessage = function (event) {
     const notificationData = JSON.parse(event.data);
 
-    if (notificationData.toString().includes("EventStream Created")) {
-      return;
-    }
-
     checkNotificationPermission().then(granted => {
       if (granted) {
         console.log('알림 권한이 부여되었습니다');
@@ -173,18 +169,13 @@ function subscribeToNotifications() {
         console.log('알림 권한이 거부되었습니다');
       }
     });
-    fetchAndDisplayNotifications();
+    fetchNotifications();
   };
 
   eventSource.onerror = function (event) {
     console.error("EventSource error:", event);
     eventSource.close();
   };
-}
-
-function fetchAndDisplayNotifications() {
-  fetchNotifications();
-  // getCountOfUnreadNotifications();
 }
 
 function checkNotificationPermission() {
@@ -198,6 +189,7 @@ function checkNotificationPermission() {
     }
   });
 }
+
 function showNotification(data) {
   const notification = new Notification('', {
     body: data.content

@@ -10,7 +10,6 @@ spring:
       ddl-auto: update
     properties:
       hibernate:
-        show_sql: true
     open-in-view: false
 
   servlet:

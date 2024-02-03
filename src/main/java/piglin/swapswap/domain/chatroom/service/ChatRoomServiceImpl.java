@@ -12,10 +12,9 @@ import org.springframework.stereotype.Service;
 import piglin.swapswap.domain.chatroom.dto.ChatRoomResponseDto;
 import piglin.swapswap.domain.chatroom.entity.ChatRoom;
 import piglin.swapswap.domain.chatroom.mapper.ChatRoomMapper;
-import piglin.swapswap.domain.chatroom.repository.ChatRoomRepository;
+import piglin.swapswap.domain.chatroom.mongorepository.ChatRoomRepository;
 import piglin.swapswap.domain.member.entity.Member;
 import piglin.swapswap.domain.member.service.MemberServiceImplV1;
-import piglin.swapswap.domain.message.constant.MessageType;
 import piglin.swapswap.domain.message.dto.request.MessageRequestDto;
 import piglin.swapswap.domain.message.dto.response.MessageResponseDto;
 import piglin.swapswap.domain.message.entity.Message;
@@ -37,7 +36,7 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     private final SimpMessageSendingOperations sendingOperations;
 
     @Override
-    public ChatRoomResponseDto getChatRoomResponseDto(Long roomId, Long memberId) {
+    public ChatRoomResponseDto getChatRoomResponseDto(String roomId, Long memberId) {
 
         ChatRoom chatRoom = getChatRoom(roomId);
         String nickname = memberService.getMember(getOtherMemberId(chatRoom, memberId)).getNickname();
@@ -48,19 +47,20 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Override
     public List<ChatRoomResponseDto> getChatRoomList(Member member) {
 
-        List<ChatRoom> chatRoomList = chatRoomRepository.findAllByMemberId(member.getId());
+        List<ChatRoom> chatRoomList = chatRoomRepository.getChatRoomList(member);
 
         return getChatRoomResponseDtoList(chatRoomList, member.getId());
     }
 
     @Override
     @Transactional
-    public Long createChatroom(Member firstMember, Long secondMemberId) {
+    public String createChatroom(Member firstMember, Long secondMemberId) {
 
-        Member secondMember = memberService.getMember(secondMemberId);
+        ChatRoom chatRoom = chatRoomRepository.getChatRoomByMemberIds(firstMember.getId(), secondMemberId);
 
-        ChatRoom chatRoom = chatRoomRepository.findChatRoomByMemberIds(firstMember.getId(), secondMember.getId())
-                .orElseGet(() -> chatRoomRepository.save(ChatRoomMapper.createChatRoom(firstMember, secondMember)));
+        if (chatRoom == null) {
+            return chatRoomRepository.insert(ChatRoomMapper.createChatRoom(firstMember, secondMemberId)).getId();
+        }
 
         reentryMember(firstMember, chatRoom);
 
@@ -68,12 +68,12 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     }
 
     @Override
-    public List<MessageResponseDto> getMessageByChatRoomId(Long roomId, Member member) {
+    public List<MessageResponseDto> getMessageByChatRoomId(String roomId, Member member) {
 
         ChatRoom chatRoom = getChatRoom(roomId);
         validateMember(member, chatRoom);
 
-        List<Message> messageList = messageService.findAllByChatRoomId(roomId);
+        List<Message> messageList = messageService.getMessageByRoomId(roomId);
 
         return MessageMapper.messageToMessageDto(messageList);
     }
@@ -82,24 +82,25 @@ public class ChatRoomServiceImpl implements ChatRoomService {
     @Transactional
     public void saveMessage(MessageRequestDto requestDto) {
 
-        ChatRoom chatRoom = getChatRoom(requestDto.chatRoomId());
+        ChatRoom chatRoom = getChatRoom(requestDto.roomId());
         Member sender = memberService.getMember(requestDto.senderId());
 
-        Message message = MessageMapper.createMessage(sender, chatRoom, requestDto);
-        chatRoom.updateChatRoom(requestDto.text());
+        updateChatRoom(requestDto);
 
+        Message message = MessageMapper.createMessage(sender, requestDto);
         messageService.saveMessage(message);
 
-        Member receiver = memberService.getMember(chatRoom.getSecondMemberId());
+        Long receiverId = chatRoom.getFirstMemberId().equals(requestDto.senderId()) ? chatRoom.getSecondMemberId() : chatRoom.getFirstMemberId();
+        Member receiver = memberService.getMember(receiverId);
 
         String Url = "http://swapswap.shop/chats/room/" + chatRoom.getId();
-        String content = receiver.getNickname()+"님! " + sender.getNickname() +"님으로부터 채팅이 왔어요!";
-        notificationService.send(receiver, NotificationType.DEAL,content,Url);
+        String content = receiver.getNickname() + "님! " + sender.getNickname() + "님으로부터 채팅이 왔어요!";
+        notificationService.send(receiver, NotificationType.DEAL, content, Url);
     }
 
     @Override
     @Transactional
-    public void leaveChatRoom(Member member, Long roomId) {
+    public void leaveChatRoom(Member member, String roomId) {
 
         ChatRoom chatRoom = getChatRoom(roomId);
 
@@ -110,17 +111,20 @@ public class ChatRoomServiceImpl implements ChatRoomService {
             chatRoom.deleteChatRoom();
             messageService.deleteMessage(chatRoom);
         }
+
+        chatRoomRepository.leaveChatRoomOrDeleteChatRoom(chatRoom);
     }
 
-    private ChatRoom getChatRoom(Long roomId) {
+    private ChatRoom getChatRoom(String roomId) {
 
-        return chatRoomRepository.findByIdAndIsDeletedFalse(roomId).orElseThrow(() ->
+        return chatRoomRepository.getChatRoom(roomId).orElseThrow(() ->
                 new BusinessException(ErrorCode.NOT_FOUND_CHATROOM_EXCEPTION));
     }
 
     private void validateMember(Member member, ChatRoom chatRoom) {
 
-        if (!(member.getId().equals(chatRoom.getFirstMemberId()) && !chatRoom.isLeaveFirstMember()) &&
+        if (!(member.getId().equals(chatRoom.getFirstMemberId()) && !chatRoom.isLeaveFirstMember())
+                &&
                 !(member.getId().equals(chatRoom.getSecondMemberId()) && !chatRoom.isLeaveSecondMember())) {
 
             throw new BusinessException(ErrorCode.NOT_CHAT_ROOM_MEMBER_EXCEPTION);
@@ -129,37 +133,28 @@ public class ChatRoomServiceImpl implements ChatRoomService {
 
     private void reentryMember(Member member, ChatRoom chatRoom) {
 
-        if (member.getId().equals(chatRoom.getFirstMemberId()) && chatRoom.isLeaveFirstMember()) {
-
-            sendEnterMessage(member, chatRoom);
-            chatRoom.reentryFirstMember();
-        }
-
-        if (member.getId().equals(chatRoom.getSecondMemberId()) && chatRoom.isLeaveSecondMember()) {
-
-            sendEnterMessage(member, chatRoom);
-            chatRoom.reentrySecondMember();
-        }
+        chatRoomRepository.reentryMember(member, chatRoom);
     }
 
-    private void sendEnterMessage(Member member,ChatRoom chatRoom) {
+    private void updateChatRoom(MessageRequestDto requestDto) {
 
-        sendingOperations.convertAndSend(
-                "/queue/chat/room" + chatRoom.getId(),
-                MessageMapper.createMessageRequestDto(chatRoom.getId(), member.getId(), MessageType.ENTER, member.getNickname() + "님이 입장하셨습니다.")
-        );
+        chatRoomRepository.updateChatRoom(requestDto);
     }
 
-    private List<ChatRoomResponseDto> getChatRoomResponseDtoList(List<ChatRoom> chatRoomList, Long memberId) {
+    private List<ChatRoomResponseDto> getChatRoomResponseDtoList(List<ChatRoom> chatRoomList,
+            Long memberId) {
 
-        List<Long> otherMemberIds = chatRoomList.stream().map(chatRoom -> getOtherMemberId(chatRoom, memberId)).toList();
+        List<Long> otherMemberIds = chatRoomList.stream()
+                .map(chatRoom -> getOtherMemberId(chatRoom, memberId)).toList();
 
         List<Member> otherMembers = memberService.getMembers(otherMemberIds);
 
-        Map<Long, String> otherMemberIdToNicknameMap = otherMembers.stream().collect(Collectors.toMap(Member::getId, Member::getNickname));
+        Map<Long, String> otherMemberIdToNicknameMap = otherMembers.stream()
+                .collect(Collectors.toMap(Member::getId, Member::getNickname));
 
         return chatRoomList.stream()
-                .sorted(Comparator.comparing(ChatRoom::getLastMessageTime, Comparator.nullsLast(Comparator.reverseOrder())))
+                .sorted(Comparator.comparing(ChatRoom::getLastMessageTime,
+                        Comparator.nullsLast(Comparator.reverseOrder())))
                 .map(chatRoom -> {
                     Long otherMemberId = getOtherMemberId(chatRoom, memberId);
                     String otherMemberNickname = otherMemberIdToNicknameMap.get(otherMemberId);

@@ -40,6 +40,7 @@ public enum ErrorCode {
     UP_IS_NEED_ONE_DAY(400, "게시된지 하루, 업 한지 하루 이상 된 게시글만 업 할 수 있습니다."),
     POST_ALREADY_DELETED(400, "이미 지워진 게시글입니다"),
     NO_MORE_POST_LIST(400, "더이상 불러올 게시글이 없습니다."),
+    ALERADY_DELING_POST_EXCEPTION(400, "이미 진행 중인 게시글입니다."),
     CAN_NOT_UP_CAUSE_POST_DEAL_STATUS_IS_NOT_REQUESTED(400, "거래가 진행 중이거나 완료된 게시글은 업 할 수 없습니다."),
 
     // 채팅
@@ -51,14 +52,27 @@ public enum ErrorCode {
     INVALID_EXPIRED_TIME_EXCEPTION(401, "만료 시간은 현재 시간보다 이전 시간일 수 없습니다."),
     NOT_FOUND_COUPON_EXCEPTION(401, "쿠폰을 찾을 수 없습니다."),
     INVALID_COUPON_EXCEPTION(401, "이미 모두 소진된 쿠폰입니다."),
+    NOT_FOUND_MEMBER_COUPON_EXCEPTION(400, "해당 쿠폰을 소지하고 있지 않습니다."),
 
     // 거래
-    CAN_NOT_UPDATE_ALLOW_STATUS(401, "수정 할 수 없는 상태입니다."),
-    NOT_FOUND_DEAL_EXCEPTION(401, "거래를 찾을 수 없습니다."),
+    BOTH_POST_ID_LIST_EMPTY_EXCEPTION(400, "두명의 사용자 중 적어도 한명의 사용자는 물건을 등록해야 합니다."),
+    CAN_NOT_UPDATE_ALLOW_STATUS(401, "수락 상태를 수정 할 수 없는 상태입니다."),
+    NOT_FOUND_DEAL_EXCEPTION(404, "거래를 찾을 수 없습니다."),
     REQUEST_ONLY_DIFFERENT_USER_EXCEPTION(401, "자신의 게시물에는 거래요청을 할 수 없습니다."),
+    IS_NOT_MY_COUPON(400, "본인의 쿠폰만 사용할 수 있습니다."),
+    CAN_NOT_UPDATE_POST_STATUS(401, "게시물이 이미 거래 진행 중 입니다."),
+    CAN_NOT_UPDATE_CAUSE_DEAL_IS_NOT_REQUESTED(401, "이미 거래가 진행돼서 수정 할 수 없습니다."),
+    DUPLICATE_COUPON_TYPE_EXCEPTION(400, "같은 타입의 쿠폰은 중복 사용이 불가능합니다."),
+    UNAUTHORIZED_MODIFY_DEAL_EXCEPTION(400, "해당 거래 내용을 수정할 권한이 없습니다."),
+    NOT_CONTAIN_DEAL_MEMBER_EXCEPTION(400, "자신이 포함된 거래만 볼수 있습니다."),
+
+    // Bill
+    NOT_FOUND_BILL_EXCEPTION(404, "거래 명세서를 찾을 수 없습니다"),
+    CAN_NOT_UPDATE_BILL_POST_LIST_CAUSE_IS_NOT_REQUESTED(400, "요청 상태가 아니어서 수정할 수 없습니다."),
 
     // 지갑
     LACK_OF_SWAP_MONEY_EXCEPTION(400, "내 지갑의 스왑머니가 부족하여 출금할 수 없습니다."),
+    NOT_FOUND_DEAL_WALLET_EXCEPTION(400, "거래 지갑을 찾을 수 없습니다."),
 
     // S3
     IS_NOT_IMAGE(400, "이미지 파일만 업로드 할 수 있습니다."),

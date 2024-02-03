@@ -22,6 +22,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.multipart.MultipartFile;
+import piglin.swapswap.domain.deal.constant.DealStatus;
 import piglin.swapswap.domain.favorite.service.FavoriteServiceImplV1;
 import piglin.swapswap.domain.member.entity.Member;
 import piglin.swapswap.domain.post.constant.Category;
@@ -173,7 +174,7 @@ class PostServiceImplV1UnitTest {
                 when(postRepository.findPostWithFavorite(postId, member)).thenReturn(
                         normalResponseDto);
                 // When
-                PostGetResponseDto result = postService.getPost(postId, member);
+                PostGetResponseDto result = postService.getPostWithFavorite(postId, member);
                 // Then
                 assertThat(result).isNotNull();
                 assertThat(result.author()).isEqualTo(author);
@@ -193,7 +194,7 @@ class PostServiceImplV1UnitTest {
                 when(postRepository.findPostWithFavorite(postId, notLoginMember)).thenReturn(
                         normalResponseDto);
                 // When
-                PostGetResponseDto result = postService.getPost(postId, notLoginMember);
+                PostGetResponseDto result = postService.getPostWithFavorite(postId, notLoginMember);
                 // Then
                 assertThat(result).isNotNull();
                 assertThat(result.author()).isEqualTo(author);
@@ -221,7 +222,7 @@ class PostServiceImplV1UnitTest {
             when(postRepository.findPostWithFavorite(postId, member)).thenReturn(nullResponseDto);
 
             // When - Then
-            assertThatThrownBy(() -> postService.getPost(postId, member))
+            assertThatThrownBy(() -> postService.getPostWithFavorite(postId, member))
                     .isInstanceOf(RuntimeException.class)
                     .hasMessageContaining(ErrorCode.NOT_FOUND_POST_EXCEPTION.getMessage());
         }
@@ -365,6 +366,109 @@ class PostServiceImplV1UnitTest {
             assertThatThrownBy(() -> postService.deletePost(anotherMember, post.getId()))
                     .isInstanceOf(BusinessException.class)
                     .hasMessageContaining(ErrorCode.REJECT_MODIFIYING_POST_EXCEPTION.getMessage());
+        }
+    }
+
+    @Nested
+    @DisplayName("게시글 업 테스트")
+    class UpPostTestList {
+
+        @Test
+        @DisplayName("게시글 업 - 성공")
+        void upPost_Success() {
+            // Given
+            Post post = Post.builder()
+                    .member(member)
+                    .dealStatus(DealStatus.REQUESTED)
+                    .modifiedUpTime(LocalDateTime.now().minusDays(1L))
+                    .id(1L)
+                    .upCnt(1L)
+                    .build();
+            when(postRepository.findByIdAndIsDeletedIsFalse(post.getId())).thenReturn(Optional.of(post));
+
+            // When
+            postService.upPost(post.getId(), member);
+
+            // Then
+            assertThat(post.getModifiedUpTime().getDayOfYear()).isEqualTo(LocalDateTime.now().getDayOfYear());
+            assertThat(post.getModifiedUpTime().getDayOfMonth()).isEqualTo(LocalDateTime.now().getDayOfMonth());
+            assertThat(post.getModifiedUpTime().getHour()).isEqualTo(LocalDateTime.now().getHour());
+            assertThat(post.getModifiedUpTime().getMinute()).isEqualTo(LocalDateTime.now().getMinute());
+            assertThat(post.getUpCnt()).isEqualTo(2L);
+        }
+
+        @Test
+        @DisplayName("게시글 업 - 실패 / 작성한 멤버랑 업하려는 멤버랑 다름")
+        void upPost_Fail_PostWriterNotMatched() {
+            // Given
+            Member anotherMember = Member.builder().id(memberId + 1).build();
+            Post post = Post.builder()
+                    .member(member)
+                    .id(1L)
+                    .build();
+            when(postRepository.findByIdAndIsDeletedIsFalse(post.getId())).thenReturn(Optional.of(post));
+
+            // When - Then
+            assertThatThrownBy(() -> postService.upPost(post.getId(), anotherMember))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining(ErrorCode.REJECT_MODIFIYING_POST_EXCEPTION.getMessage());
+        }
+
+        @Test
+        @DisplayName("게시글 업 - 실패 / 게시글 등록 및 업 한 지 하루도 지나지 않음")
+        void upPost_Fail_PostUpNeedOneDay() {
+            // Given
+            Post post = Post.builder()
+                    .member(member)
+                    .dealStatus(DealStatus.REQUESTED)
+                    .modifiedUpTime(LocalDateTime.now())
+                    .id(1L)
+                    .upCnt(1L)
+                    .build();
+            when(postRepository.findByIdAndIsDeletedIsFalse(post.getId())).thenReturn(Optional.of(post));
+
+            // When - Then
+            assertThatThrownBy(() -> postService.upPost(post.getId(), member))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining(ErrorCode.UP_IS_NEED_ONE_DAY.getMessage());
+        }
+
+        @Test
+        @DisplayName("게시글 업 - 실패 / 게시글이 거래 진행중임")
+        void upPost_Fail_PostIsDealing() {
+            // Given
+            Post post = Post.builder()
+                    .member(member)
+                    .dealStatus(DealStatus.DEALING)
+                    .modifiedUpTime(LocalDateTime.now().minusDays(1))
+                    .id(1L)
+                    .upCnt(1L)
+                    .build();
+            when(postRepository.findByIdAndIsDeletedIsFalse(post.getId())).thenReturn(Optional.of(post));
+
+            // When - Then
+            assertThatThrownBy(() -> postService.upPost(post.getId(), member))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining(ErrorCode.CAN_NOT_UP_CAUSE_POST_DEAL_STATUS_IS_NOT_REQUESTED.getMessage());
+        }
+
+        @Test
+        @DisplayName("게시글 업 - 실패 / 게시글이 거래 완료 됨")
+        void upPost_Fail_PostIsCompleted() {
+            // Given
+            Post post = Post.builder()
+                    .member(member)
+                    .dealStatus(DealStatus.COMPLETED)
+                    .modifiedUpTime(LocalDateTime.now().minusDays(1))
+                    .id(1L)
+                    .upCnt(1L)
+                    .build();
+            when(postRepository.findByIdAndIsDeletedIsFalse(post.getId())).thenReturn(Optional.of(post));
+
+            // When - Then
+            assertThatThrownBy(() -> postService.upPost(post.getId(), member))
+                    .isInstanceOf(BusinessException.class)
+                    .hasMessageContaining(ErrorCode.CAN_NOT_UP_CAUSE_POST_DEAL_STATUS_IS_NOT_REQUESTED.getMessage());
         }
     }
 

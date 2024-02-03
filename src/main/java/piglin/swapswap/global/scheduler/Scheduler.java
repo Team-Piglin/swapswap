@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
-import piglin.swapswap.domain.chatroom.repository.ChatRoomRepository;
+import piglin.swapswap.domain.chatroom.mongorepository.ChatRoomRepository;
 import piglin.swapswap.domain.favorite.repository.FavoriteRepository;
 import piglin.swapswap.domain.member.repository.MemberRepository;
 import piglin.swapswap.domain.membercoupon.repository.MemberCouponRepository;
@@ -38,7 +38,7 @@ public class Scheduler {
         LocalDateTime fourteenDaysAgo = LocalDateTime.now().minusDays(14);
 
         walletHistoryRepository.deleteAllByIsDeletedIsTrueAndModifiedTimeBefore(fourteenDaysAgo);
-        memberCouponRepository.deleteAllByIsDeletedIsTrueAndModifiedTimeBefore(fourteenDaysAgo);
+        memberCouponRepository.deleteAllByIsUsedIsTrueAndModifiedTimeBefore(fourteenDaysAgo);
         chatRoomRepository.deleteAllByIsDeletedIsTrueAndModifiedTimeBefore(fourteenDaysAgo);
         favoriteRepository.deleteAllByIsDeletedIsTrueAndModifiedTimeBefore(fourteenDaysAgo);
 

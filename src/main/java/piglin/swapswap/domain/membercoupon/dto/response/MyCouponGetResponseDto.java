@@ -6,6 +6,7 @@ import piglin.swapswap.domain.coupon.constant.CouponType;
 
 @Builder
 public record MyCouponGetResponseDto(
+        Long couponId,
         String couponName,
         CouponType couponType,
         int discountPercentage,
