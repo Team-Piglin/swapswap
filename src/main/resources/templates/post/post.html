@@ -219,7 +219,7 @@
       $.ajax({
         url: '/chats/create',
         type: 'POST',
-        data: {receiveMemberId: userId},
+        data: {secondMemberId: userId},
 
         success: function (response) {
           console.log(response);

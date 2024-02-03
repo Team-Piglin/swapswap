@@ -63,12 +63,14 @@ public class DealServiceImplV1 implements DealService {
 
         Deal deal = DealMapper.createDeal(requestMemberBill, receiveMemberBill);
         log.info("BillIdAfterCreateDeal - requestMemberBillId: {} | receiveMemberBillId: {}", deal.getRequestMemberbill().getId(), deal.getReceiveMemberbill().getId());
+
+        dealRepository.save(deal);
+        log.info("dealId: {}", deal.getId());
+
         String Url = "http://swapswap.shop/deals/" + deal.getId();
         String content = receiveMember.getNickname()+"님! 거래 요청이 왔어요!";
         notificationService.send(receiveMember, NotificationType.DEAL,content,Url);
 
-        dealRepository.save(deal);
-        log.info("dealId: {}", deal.getId());
         return deal.getId();
     }
 
