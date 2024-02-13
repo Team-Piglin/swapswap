@@ -140,6 +140,7 @@ public class PostServiceImplV1 implements PostService {
 
         Category categoryCond = null;
         City cityCond = null;
+        String titleCond = title.replaceAll(" ", "");
 
         if (category != null) {
             categoryCond = Enum.valueOf(Category.class, category);
@@ -150,7 +151,7 @@ public class PostServiceImplV1 implements PostService {
         }
 
         List<PostListDetailResponseDto> postList = postRepository.searchPostListWithFavorite(
-                title, categoryCond, cityCond, member, cursorTime);
+                titleCond, categoryCond, cityCond, member, cursorTime);
 
         return createPostListResponseDtoWithIsLast(postList);
     }
