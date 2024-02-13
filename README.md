@@ -148,3 +148,11 @@ Poling, FCM, Websocket, SSE 중 사용자에게 알림을 전송할 때 어떤 �
 SSE는 HTTP프로토콜만 사용하여 비교적 가볍고 애플리케이션 특성상 빈번하게 알림이 발생할 수 있는 상황임에도 처음 한번만 연결하면 재연결 과정이 필요가 없어 서버의 부하를 줄일 수 있습니다. 그리고 이벤트들을 비동기적으로 전송하기 때문에 실시간성이 좋아 사용자 경험을 향상시킬 수 있습니다.
 </div>
 </details>
+				
+## 멤버
+
+|                     [손창현](https://github.com/mistarson)                     |                      [조원호](https://github.com/wonowonow)                      |                       [차우빈](https://github.com/ckdnqls)                        |                       [우성현](https://github.com/sungpal)                        |                       [문기현](https://github.com/MoonKiHyun)                 |
+|:-----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|:-----------------------------------------------------------------------------:|
+| <img src="https://github.com/Team-Piglin/swapswap/assets/123870616/ec6b70e9-4ac5-4e8f-8e05-28a1fa90dc18" width="150">  | <img src="https://github.com/Team-Piglin/swapswap/assets/123870616/0c23806d-82f3-44f7-a648-016b991233bc" width="150">|  <img src="https://github.com/Team-Piglin/swapswap/assets/123870616/d94040eb-da47-4e45-a38a-5bfdf8def5d4" width="150">  | <img src="https://github.com/Team-Piglin/swapswap/assets/123870616/aa0cb48a-b2e8-46e5-aaaa-c253c7a2dc86" width="150">  | <img src="https://github.com/Team-Piglin/swapswap/assets/123870616/fd126a02-5a30-45b8-a115-46bbd96a1e77" width="150">  |
+
+<br>
