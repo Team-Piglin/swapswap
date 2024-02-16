@@ -179,7 +179,7 @@ public class MemberController {
             Model model
     ) {
 
-        PostListResponseDto responseDtoList = postService.getMyPostList(member,
+        PostListResponseDto responseDtoList = postService.getPostListByMember(member,
                 cursorTime);
 
         model.addAttribute("postListResponseDto", responseDtoList);
@@ -196,6 +196,15 @@ public class MemberController {
         return "member/otherMemberInfo";
     }
 
+    @GetMapping("/members/{memberId}/posts/more")
+    public String getOtherMemberInfoMore(@PathVariable Long memberId, Model model, @RequestParam(required = false) LocalDateTime cursorTime) {
+
+        model.addAttribute("postListResponseDto", memberService.getOtherMemberInfoMore(memberId,
+                cursorTime));
+
+        return "post/postListFragment";
+    }
+
     @GetMapping("/members/posts/more")
     public String getMyPostListMore(
             @AuthMember Member member,
@@ -203,7 +212,7 @@ public class MemberController {
             Model model
     ) {
 
-        PostListResponseDto responseDtoList = postService.getMyPostList(member,
+        PostListResponseDto responseDtoList = postService.getPostListByMember(member,
                 cursorTime);
 
         model.addAttribute("postListResponseDto", responseDtoList);

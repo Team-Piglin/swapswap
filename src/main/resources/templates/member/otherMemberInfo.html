@@ -66,6 +66,7 @@
   <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
   <script th:inline="javascript">
 
+    const memberId = [[${otherMemberInfo.memberId}]]
     let isLast = [[${otherMemberInfo.postList.isLast}]];
     let isLoading = false;
     let lastModifiedTime = null; // 마지막 게시물 수정 시간 초기화
@@ -105,7 +106,7 @@
 
     function loadMorePosts() {
       isLoading = true;
-      let url = '/members/posts/more?cursorTime=' + lastModifiedTime;
+      let url = '/members/'+ memberId +'/posts/more?cursorTime=' + lastModifiedTime;
 
       if(!isLast) {
 
@@ -150,6 +151,7 @@
     }
 
     function toggleFavorite(postId) {
+      console.log(postId)
       $.ajax({
         url: '/posts/' + postId + '/favorite',
         type: 'PATCH',

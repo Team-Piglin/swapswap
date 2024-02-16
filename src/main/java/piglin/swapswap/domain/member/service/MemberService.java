@@ -5,6 +5,7 @@ import java.util.List;
 import piglin.swapswap.domain.member.dto.MemberNicknameDto;
 import piglin.swapswap.domain.member.dto.OtherMemberInfoDto;
 import piglin.swapswap.domain.member.entity.Member;
+import piglin.swapswap.domain.post.dto.response.PostListResponseDto;
 
 public interface MemberService {
 
@@ -23,4 +24,6 @@ public interface MemberService {
     List<Member> getMembers(List<Long> memberIds);
 
     OtherMemberInfoDto getOtherMemberInfo(Long memberId, LocalDateTime cursorTime);
+
+    PostListResponseDto getOtherMemberInfoMore(Long memberId, LocalDateTime cursorTime);
 }
