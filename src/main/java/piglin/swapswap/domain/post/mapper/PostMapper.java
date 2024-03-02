@@ -7,6 +7,8 @@ import piglin.swapswap.domain.deal.constant.DealStatus;
 import piglin.swapswap.domain.member.entity.Member;
 import piglin.swapswap.domain.post.dto.request.PostCreateRequestDto;
 import piglin.swapswap.domain.post.dto.request.PostUpdateRequestDto;
+import piglin.swapswap.domain.post.dto.response.PostListDetailResponseDto;
+import piglin.swapswap.domain.post.dto.response.PostListResponseDto;
 import piglin.swapswap.domain.post.dto.response.PostSimpleResponseDto;
 import piglin.swapswap.domain.post.entity.Post;
 
@@ -46,12 +48,15 @@ public class PostMapper {
                 .toList();
     }
 
-    public static PostSimpleResponseDto getPostSimpleInfoListByPost(Post post) {
+    public static PostListResponseDto createPostListResponseDtoWithIsLast(
+            List<PostListDetailResponseDto> postList) {
 
-        return PostSimpleResponseDto.builder()
-                        .postId(post.getId())
-                        .postTitle(post.getTitle())
-                        .imageUrl(post.getImageUrl().get(0).toString())
-                        .build();
+        boolean isLast = false;
+
+        if (postList.isEmpty()) {
+            isLast = true;
+        }
+
+        return new PostListResponseDto(postList, isLast);
     }
 }

@@ -16,6 +16,7 @@ import piglin.swapswap.domain.membercoupon.service.MemberCouponService;
 import piglin.swapswap.domain.notification.service.NotificationService;
 import piglin.swapswap.domain.post.dto.response.PostListResponseDto;
 import piglin.swapswap.domain.post.entity.Post;
+import piglin.swapswap.domain.post.mapper.PostMapper;
 import piglin.swapswap.domain.post.service.PostService;
 import piglin.swapswap.domain.wallet.entity.Wallet;
 import piglin.swapswap.domain.wallethistory.service.WalletHistoryService;
@@ -129,12 +130,20 @@ public class MemberServiceImplV1 implements MemberService {
 
     @Override
     public OtherMemberInfoDto getOtherMemberInfo(Long memberId, LocalDateTime cursorTime) {
-        Member member = getMember(memberId);
-        PostListResponseDto responseDtoList = postService.getMyPostList(member, cursorTime);
 
-        return MemberMapper.createOtherMemberInfoDto(member.getNickname(), member.getCreatedTime(),
+        Member member = getMember(memberId);
+        PostListResponseDto responseDtoList = postService.getPostListByMember(member, cursorTime);
+
+        return MemberMapper.createOtherMemberInfoDto(member,
                 responseDtoList);
     }
 
+
+    public PostListResponseDto getOtherMemberInfoMore(Long memberId, LocalDateTime cursorTime) {
+
+        Member member = getMember(memberId);
+
+        return postService.getPostListByMember(member, cursorTime);
+    }
 
 }

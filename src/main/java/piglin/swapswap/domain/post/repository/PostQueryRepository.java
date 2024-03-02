@@ -14,7 +14,7 @@ public interface PostQueryRepository {
     List<PostListDetailResponseDto> findPostListWithFavoriteByCursor(
             Member member, LocalDateTime cursorTime);
 
-    List<PostListDetailResponseDto> searchPostListWithFavorite(String title, Category categoryCond,
+    List<PostListDetailResponseDto> searchPostListWithFavorite(String titleCond, Category categoryCond,
             City cityCond, Member member, LocalDateTime cursorTime);
 
     PostGetResponseDto findPostWithFavorite(Long postId, Member member);

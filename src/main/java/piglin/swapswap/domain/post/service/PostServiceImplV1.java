@@ -80,7 +80,7 @@ public class PostServiceImplV1 implements PostService {
         List<PostListDetailResponseDto> postList = postRepository.findPostListWithFavoriteByCursor(
                 member, cursorTime);
 
-        return createPostListResponseDtoWithIsLast(postList);
+        return PostMapper.createPostListResponseDtoWithIsLast(postList);
     }
 
     @Override
@@ -140,6 +140,7 @@ public class PostServiceImplV1 implements PostService {
 
         Category categoryCond = null;
         City cityCond = null;
+        String titleCond = title.replaceAll(" ", "");
 
         if (category != null) {
             categoryCond = Enum.valueOf(Category.class, category);
@@ -150,9 +151,9 @@ public class PostServiceImplV1 implements PostService {
         }
 
         List<PostListDetailResponseDto> postList = postRepository.searchPostListWithFavorite(
-                title, categoryCond, cityCond, member, cursorTime);
+                titleCond, categoryCond, cityCond, member, cursorTime);
 
-        return createPostListResponseDtoWithIsLast(postList);
+        return PostMapper.createPostListResponseDtoWithIsLast(postList);
     }
 
     @Override
@@ -181,7 +182,7 @@ public class PostServiceImplV1 implements PostService {
         List<PostListDetailResponseDto> postList = postRepository.findAllMyFavoritePost(
                 member, cursorTime);
 
-        return createPostListResponseDtoWithIsLast(postList);
+        return PostMapper.createPostListResponseDtoWithIsLast(postList);
     }
 
     @Override
@@ -191,12 +192,12 @@ public class PostServiceImplV1 implements PostService {
     }
 
     @Override
-    public PostListResponseDto getMyPostList(Member member, LocalDateTime cursorTime) {
+    public PostListResponseDto getPostListByMember(Member member, LocalDateTime cursorTime) {
 
         List<PostListDetailResponseDto> postList = postRepository.findAllMyPostList(member,
                 cursorTime);
 
-        return createPostListResponseDtoWithIsLast(postList);
+        return PostMapper.createPostListResponseDtoWithIsLast(postList);
     }
 
     private void checkPostDealStatus(Post post) {
@@ -266,18 +267,6 @@ public class PostServiceImplV1 implements PostService {
         if (responseDto.author() == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_POST_EXCEPTION);
         }
-    }
-
-    private PostListResponseDto createPostListResponseDtoWithIsLast(
-            List<PostListDetailResponseDto> postList) {
-
-        boolean isLast = false;
-
-        if (postList.isEmpty()) {
-            isLast = true;
-        }
-
-        return new PostListResponseDto(postList, isLast);
     }
 
     @Override
