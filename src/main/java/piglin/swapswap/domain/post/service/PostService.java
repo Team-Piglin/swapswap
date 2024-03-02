@@ -89,12 +89,12 @@ public interface PostService {
     void upPost(Long postId, Member member);
 
     /**
-     * 내 게시글 목록 조회 기능입니다.
-     * @param member 자신의 게시글 목록을 불러오기 위한 UserDetails 에서 받아온 매개변수입니다.
+     * 멤버 게시글 목록 조회 기능입니다.
+     * @param member 자신의 게시글 목록을 불러오기 위한 매개변수입니다.
      * @param cursorTime 커서 기반 페이지네이션을 위해 받는 커서입니다.
      * @return PostListResponseDto 를 반환하여 Model 로 화면을 그립니다.
      */
-    PostListResponseDto getMyPostList(Member member, LocalDateTime cursorTime);
+    PostListResponseDto getPostListByMember(Member member, LocalDateTime cursorTime);
 
     /**
      * 내 게시글 찜 목록 조회 기능입니다.

@@ -6,6 +6,8 @@ import piglin.swapswap.domain.post.dto.response.PostListResponseDto;
 
 @Builder
 public record OtherMemberInfoDto(
+        Long memberId,
+
         String nickname,
 
         LocalDateTime createdTime,

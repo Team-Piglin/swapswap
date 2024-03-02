@@ -1,6 +1,7 @@
 package piglin.swapswap.domain.member.mapper;
 
 import java.time.LocalDateTime;
+import javax.sound.midi.MetaMessage;
 import piglin.swapswap.domain.member.constant.MemberRole;
 import piglin.swapswap.domain.member.dto.OtherMemberInfoDto;
 import piglin.swapswap.domain.member.dto.SocialUserInfo;
@@ -21,12 +22,13 @@ public class MemberMapper {
                 .build();
     }
 
-    public static OtherMemberInfoDto createOtherMemberInfoDto(String nickname,
-            LocalDateTime createdTime, PostListResponseDto postList) {
+    public static OtherMemberInfoDto createOtherMemberInfoDto(Member member,
+            PostListResponseDto postList) {
 
         return OtherMemberInfoDto.builder()
-                .nickname(nickname)
-                .createdTime(createdTime)
+                .memberId(member.getId())
+                .nickname(member.getNickname())
+                .createdTime(member.getCreatedTime())
                 .postList(postList)
                 .build();
     }
