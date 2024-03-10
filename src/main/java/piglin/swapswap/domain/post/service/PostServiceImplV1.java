@@ -140,7 +140,11 @@ public class PostServiceImplV1 implements PostService {
 
         Category categoryCond = null;
         City cityCond = null;
-        String titleCond = title.replaceAll(" ", "");
+        String titleCond = null;
+
+        if (title != null) {
+           titleCond = title.replaceAll(" ", "");
+        }
 
         if (category != null) {
             categoryCond = Enum.valueOf(Category.class, category);
