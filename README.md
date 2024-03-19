@@ -13,7 +13,7 @@
 ### 서비스 아키텍처
 ![image](https://github.com/Team-Piglin/swapswap/assets/123870616/a504b965-6ce4-4758-bf32-1a2ca76cee2e)
 ### CI/CD 아키텍처
-![스크린샷 2024-02-02 오전 2 41 40](https://github.com/Team-Piglin/swapswap/assets/123870616/ffed3cc0-3384-4f8f-a3cf-393c7a296150)
+![image](https://github.com/Team-Piglin/swapswap/assets/40788498/4b0a8b5d-839a-4c1a-8424-bb8c9f919d65)
 ---
 # 💙 주요 기술
 - 대용량 선착순 쿠폰 발급 기능
